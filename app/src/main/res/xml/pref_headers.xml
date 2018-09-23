@@ -1,0 +1,19 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- These settings headers are only used on tablets. -->
+    <header
+        android:fragment="com.gnssapps.acq.torinex.SettingsActivity$SetupAcqPreferenceFragment"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="@string/pref_header_setupAcq" />
+    <header
+        android:fragment="com.gnssapps.acq.torinex.SettingsActivity$DataAcqPreferenceFragment"
+        android:icon="@drawable/ic_call_received_black_24dp"
+        android:title="@string/dataAcq_header" />
+    <header
+        android:fragment="com.gnssapps.acq.torinex.SettingsActivity$SetupRINEXPreferenceFragment"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="@string/pref_header_setupRINEX" />
+    <header
+        android:fragment="com.gnssapps.acq.torinex.SettingsActivity$GenerateRinexPreferenceFragment"
+        android:icon="@drawable/ic_archive_black_24dp"
+        android:title="@string/genRinex_header" />
+</preference-headers>

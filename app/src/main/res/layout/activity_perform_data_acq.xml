@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.gnssapps.acq.torinex.PerformDataAcq"
+    android:orientation="vertical"
+    android:gravity="center_horizontal" >
+    <TextView
+        android:id="@+id/perf_dataAcq_satState"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="14"
+        android:scrollbars="vertical"
+        android:text="@string/dataAcq_satStatTitle"
+        tools:fontFamily="monospace"
+        />
+    <TextView
+        android:id="@+id/perf_dataAcq_navState"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:text="@string/dataAcq_navStateTitle"
+        />
+    <ToggleButton
+        android:id="@+id/perf_dataAcq_startStop"
+        android:layout_width="wrap_content"
+        android:layout_height="0px"
+        android:layout_weight="4"
+        android:gravity="center"
+        android:textOff="@string/dataAcq_startStop_txtOff"
+        android:textOn="@string/dataAcq_startStop_txtOn"
+        android:textStyle="bold"
+        />
+    <ProgressBar
+        android:id="@+id/perf_dataAcq_progress"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:max="@string/pref_default_total_epochs"
+        android:progressTint="@color/colorAccent"
+        android:visibility="visible"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:id="@+id/perf_dataAcq_surveyName_title"
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="@string/dataAcq_surveyTitle" />
+        <TextView
+            android:id="@+id/perf_dataAcq_surveyName"
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:id="@+id/perf_dataAcq_pointName_title"
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="@string/dataAcq_pointTitle" />
+
+        <TextView
+            android:id="@+id/perf_dataAcq_pointName"
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <View style="@style/Divider"
+        />
+    <TextView
+        android:id="@+id/perf_dataAcq_points_title"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:text="@string/dataAcq_pointsAcq"
+        />
+    <TextView
+        android:id="@+id/perf_dataAcq_points"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="5"
+        android:scrollbars="vertical"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/perf_dataAcq_log"
+        android:layout_width="fill_parent"
+        android:layout_height="0px"
+        android:layout_weight="5"
+        android:scrollbars="vertical"
+        android:text="@string/dataAcq_logMsgs"
+        />
+</LinearLayout>

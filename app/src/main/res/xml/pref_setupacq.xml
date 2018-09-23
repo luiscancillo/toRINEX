@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <!--android:capitalize="words" -->
+    <!--android:inputType="textCapWords" -->
+    <!-- -->
+    <!--LITE version: added android:enabled="false". To be removed for normal behaviour -->
+
+    <EditTextPreference
+        android:title="@string/pref_title_survey_name"
+        android:key="survey_name"
+        android:defaultValue="@string/pref_default_survey_name"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <ListPreference
+        android:title="@string/pref_title_measurements_interval"
+        android:key="measurements_interval"
+        android:defaultValue="1"
+        android:entries="@array/pref_list_measurements_interval"
+        android:entryValues="@array/pref_list_measurements_interval_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_total_epochs"
+        android:editable="false"
+        android:key="total_epochs"
+        android:maxLines="1"
+        android:enabled="false"
+        android:singleLine="true"
+        android:title="@string/pref_title_total_epochs" />
+    <SwitchPreference
+        android:title="@string/pref_title_acquire_nav_message"
+        android:key="acquire_nav_message"
+        android:summaryOn="@string/pref_summaryOn_acquire_nav_message"
+        android:summaryOff="@string/pref_summaryOff_acquire_nav_message"
+        android:enabled="false"
+        android:defaultValue="false" />
+</PreferenceScreen>

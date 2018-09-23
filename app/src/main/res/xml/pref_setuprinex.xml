@@ -1,0 +1,113 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+<PreferenceCategory
+    android:title="@string/pref_title_rinex_categorymandatory"
+    android:key="rinex_categorymandatory" >
+    <ListPreference
+        android:title="@string/pref_title_rinex_version"
+        android:key="rinex_version"
+        android:entries="@array/pref_rinex_version"
+        android:entryValues="@array/pref_rinex_version_values"
+        android:defaultValue="@string/pref_default_rinex_version"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_site"
+        android:key="rinex_site"
+        android:defaultValue="@string/pref_default_rinex_site"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_runby"
+        android:key="rinex_runby"
+        android:defaultValue="@string/pref_default_rinex_unknown"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_markername"
+        android:key="rinex_markername"
+        android:defaultValue="@string/pref_default_rinex_unknown"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_markertype"
+        android:key="rinex_markertype"
+        android:defaultValue="@string/pref_default_rinex_markertype"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_observer"
+        android:key="rinex_observer"
+        android:defaultValue="@string/pref_default_rinex_unknown"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_agency"
+        android:key="rinex_agency"
+        android:defaultValue="@string/pref_default_rinex_unknown"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_receivernumber"
+        android:key="rinex_receivernumber"
+        android:defaultValue="@string/pref_default_rinex_one"
+        android:maxLines="1"
+        android:singleLine="true" />
+</PreferenceCategory>
+<PreferenceCategory
+        android:title="@string/pref_title_rinex_categoryoptional"
+        android:key="rinex_categoryoptional">
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_comment"
+        android:key="rinex_comment" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_markernumber"
+        android:key="rinex_markernumber"
+        android:defaultValue="@string/pref_default_rinex_one"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <ListPreference
+        android:title="@string/pref_title_rinex_clkoffs"
+        android:key="rinex_clkoffs"
+        android:entries="@array/pref_rinex_clkoffs"
+        android:entryValues="@array/pref_rinex_clkoffs_values"
+        android:defaultValue="@string/pref_default_rinex_clkoffs"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+</PreferenceCategory>
+<PreferenceCategory
+        android:title="@string/pref_title_rinex_categoryselect"
+        android:key="rinex_categoryselect" >
+    <SwitchPreference
+        android:title="@string/pref_title_rinex_fitinterval"
+        android:key="rinex_fitinterval"
+        android:summaryOff="@string/pref_summaryOff_rinex_fitinterval"
+        android:summaryOn="@string/pref_summaryOn_rinex_fitinterval"
+        android:defaultValue="true" />
+    <ListPreference
+        android:title="@string/pref_title_rinex_loglevel"
+        android:key="rinex_loglevel"
+        android:entries="@array/pref_rinex_loglevel"
+        android:entryValues="@array/pref_rinex_loglevel_values"
+        android:defaultValue="@string/pref_default_rinex_loglevel"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <MultiSelectListPreference
+        android:title="@string/pref_title_rinex_constellations"
+        android:key="rinex_constellations"
+        android:entries="@array/pref_rinex_constellations"
+        android:entryValues="@array/pref_rinex_constellations_values"
+        android:defaultValue="@array/pref_default_rinex_constellations" />
+    <EditTextPreference
+        android:title="@string/pref_title_rinex_satellites"
+        android:key="rinex_satellites"
+        android:maxLines="1"
+        android:singleLine="true" />
+    <MultiSelectListPreference
+        android:title="@string/pref_title_rinex_observables"
+        android:key="rinex_observables"
+        android:entries="@array/pref_rinex_observables"
+        android:entryValues="@array/pref_rinex_observables_values"
+        android:defaultValue="@array/pref_default_rinex_observables" />
+    </PreferenceCategory>
+</PreferenceScreen>
