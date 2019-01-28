@@ -413,7 +413,7 @@ public class PerformDataAcq extends AppCompatActivity {
             if ((epochRawData.get(0)).timeTag != tTag) {
                 //epoch has changed, store and/or display saved values as requested
                 epochCounter++;
-                if (storeEpoch)  storeEpochData();
+                if (storeEpoch && (epochCounter <= totalEpochs))  storeEpochData();
                 if (displayEpoch) {
                     epochObsTagged = formatEpochData(tRxGNSS - tRxGNSSbias);
                     navStatusTagged = formatNavStatus(navStatus);
@@ -551,7 +551,7 @@ public class PerformDataAcq extends AppCompatActivity {
             return true;
         } catch (IOException e) {
             //Log.w("createObsStore", e);
-            String errorMsg = "IOException createObsStore:" + e;
+            String errorMsg = "When createObsStore:" + e;
             dataAcq_log.setText(errorMsg);
             return false;
         }
@@ -574,7 +574,7 @@ public class PerformDataAcq extends AppCompatActivity {
             return true;
         } catch (IOException e) {
             //Log.w("createNavStore", e);
-            String errorMsg = "IOException createNavStore:" + e;
+            String errorMsg = "When createNavStore:" + e;
             dataAcq_log.setText(errorMsg);
             return false;
         }
@@ -643,7 +643,7 @@ public class PerformDataAcq extends AppCompatActivity {
                         svo.timeOffsetNanos, svo.carrierFrequencyMHz, svo.psrangeRate);
             }
         } catch (IllegalFormatException e) {
-            String errorMsg = "IllegalFormatException storeEpochData:" + e;
+            String errorMsg = "When fmt storeEpochData:" + e;
             dataAcq_log.setText(errorMsg);
         }
     }
@@ -670,7 +670,7 @@ public class PerformDataAcq extends AppCompatActivity {
                 dataAcq_log.setText(errorMsg);
             }
         } catch (IllegalFormatException e) {
-            String errorMsg = "IllegalFormatException storeRxIdMsg:" + e;
+            String errorMsg = "When fmt storeRxIdMsg:" + e;
             dataAcq_log.setText(errorMsg);
         }
     }
@@ -691,7 +691,7 @@ public class PerformDataAcq extends AppCompatActivity {
             for (int i = 0; i < msgSize; i++) gnssNavOut.printf(";%02X", (int) msg[i]);
             gnssNavOut.printf("\n");
         } catch (IllegalFormatException e) {
-            String errorMsg = "IllegalFormatException storeNavMsg:" + e;
+            String errorMsg = "When fmt storeNavMsg:" + e;
             dataAcq_log.setText(errorMsg);
         }
     }

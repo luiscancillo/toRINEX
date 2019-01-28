@@ -132,7 +132,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 //Toast.makeText(getApplicationContext(), "Home selected", Toast.LENGTH_SHORT).show();
                 //finish();
                 //return true;
-                //return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -230,7 +229,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             Calendar calendar = Calendar.getInstance();
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             SharedPreferences.Editor editor = prefs.edit();
-            String survey = String.format("S_%ty_%tm_%td_%tH_%tM",calendar,calendar,calendar,calendar,calendar);
+            String survey = String.format("S%tY%tm%td_%tH_%tM",calendar,calendar,calendar,calendar,calendar);
             editor.putString("survey_name", survey);
             editor.commit();
             addPreferencesFromResource(R.xml.pref_setupacq);

@@ -64,5 +64,11 @@ public class Constants {
     public static final String SEMICOLON = ";";
     public static final int RINEX_SINGLE = 0;
     public static final int RINEX_MULTIPLE = 1;
-
+    //return codes
+    public static final int RET_ERR_OPENRAW = 1;
+    public static final int RET_ERR_READRAW = 2;
+    public static final int RET_ERR_CREOBS = 4;
+    public static final int RET_ERR_WRIOBS = 8;
+    public static final int RET_ERR_CRENAV = 16;
+    public static final int RET_ERR_WRINAV = 32;
 }

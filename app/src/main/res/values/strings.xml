@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">toRINEX</string>
+    <string name="app_name">to RINEX Lite</string>
     <string name="app_reqAPIlevel">This application requires Android 7.1 or higher</string>
     <string name="app_perm_OK">Permissions GRANTED</string>
     <string name="app_perm_NOK">Permissions NOT granted. Cannot continue</string>
@@ -7,7 +7,7 @@
     <!-- Data acquisition settings -->
     <string name="pref_header_setupAcq">Setup data acquisition</string>
     <string name="pref_title_survey_name">Survey name</string>
-    <string name="pref_default_survey_name">S_YY_MM_DD_hh_mm</string>
+    <string name="pref_default_survey_name">SYYYYMMDD_hh_mm</string>
     <string name="pref_title_measurements_interval">GNSS measurements interval in seconds</string>
     <string-array name="pref_list_measurements_interval">
         <item>1</item>
@@ -21,7 +21,7 @@
     </string-array>
     <string name="pref_default_interval_value">1</string>
     <string name="pref_title_total_epochs">Epochs to acquire per point</string>
-    <string name="pref_default_total_epochs">5</string>
+    <string name="pref_default_total_epochs">10</string>
     <string name="pref_title_acquire_nav_message">Navigation data</string>
     <string name="pref_summaryOn_acquire_nav_message">Acquire navigation message data from receiver</string>
     <string name="pref_summaryOff_acquire_nav_message">Do not acquire navigation message data from receiver</string>
@@ -49,7 +49,8 @@
     <string name="pref_title_rinex_version">RINEX version to use</string>
     <string name="pref_title_rinex_categorymandatory">Mandatory header records data</string>
     <string name="pref_title_rinex_categoryoptional">Optional header records data</string>
-    <string name="pref_title_rinex_categoryselect">Filtering parameters</string>
+    <string name="pref_title_rinex_categoryselect">Data filtering parameters</string>
+    <string name="pref_title_rinex_categoryothers">Others</string>
     <string-array name="pref_rinex_version">
         <item>2.10</item>
         <item>3.02</item>
@@ -66,7 +67,6 @@
     <string name="pref_title_rinex_observer">OBSERVER header field</string>
     <string name="pref_title_rinex_agency">AGENCY header field</string>
     <string name="pref_title_rinex_receivernumber">REC # (receiver number) header field</string>
-
     <string name="pref_title_rinex_comment">COMMENT header record</string>
     <string name="pref_title_rinex_markernumber">MARKER NUMBER header record</string>
     <string name="pref_title_rinex_clkoffs">RCV CLOCK OFFS APPL record</string>
@@ -79,7 +79,6 @@
         <item>1</item>
     </string-array>
     <string name="pref_default_rinex_clkoffs">1</string>
-
     <string name="pref_title_rinex_fitinterval">Adjust interval to duty cycle</string>
     <string name="pref_summaryOn_rinex_fitinterval">Set interval value to duty cycle and include only one measurement per cycle.</string>
     <string name="pref_summaryOff_rinex_fitinterval">Keep interval value stated and include all measurements taken</string>
@@ -88,22 +87,6 @@
     <string name="pref_default_rinex_one">1</string>
     <string name="pref_default_rinex_markertype">HUMAN</string>
     <string name="pref_default_rinex_site">SSSS</string>
-    <string name="pref_title_rinex_loglevel">Logging level when generating RINEX files</string>
-    <string-array name="pref_rinex_loglevel">
-        <item>INFO</item>
-        <item>CONFIG</item>
-        <item>FINE</item>
-        <item>FINER</item>
-        <item>FINEST</item>
-    </string-array>
-    <string-array name="pref_rinex_loglevel_values">
-        <item>INFO</item>
-        <item>CONFIG</item>
-        <item>FINE</item>
-        <item>FINER</item>
-        <item>FINEST</item>
-    </string-array>
-    <string name="pref_default_rinex_loglevel">INFO</string>
     <string name="pref_title_rinex_constellations">Constellations to EXCLUDE in RINEX files</string>
     <string-array name="pref_rinex_constellations">
         <item>GPS</item>
@@ -149,68 +132,94 @@
     </string-array>
     <string-array name="pref_default_rinex_observables">
     </string-array>
+    <string name="pref_title_rinex_country">ISO country code (for RINEX V3.02 file names)</string>
+    <string name="pref_title_rinex_loglevel">Logging level when generating RINEX files</string>
+    <string-array name="pref_rinex_loglevel">
+        <item>INFO</item>
+        <item>CONFIG</item>
+        <item>FINE</item>
+        <item>FINER</item>
+        <item>FINEST</item>
+    </string-array>
+    <string-array name="pref_rinex_loglevel_values">
+        <item>INFO</item>
+        <item>CONFIG</item>
+        <item>FINE</item>
+        <item>FINER</item>
+        <item>FINEST</item>
+    </string-array>
+    <string name="pref_default_rinex_loglevel">INFO</string>
     <!-- RINEX files generation -->
     <string name="genRinex_header">Generate RINEX files</string>
     <string name="genRinex_survey">Survey name: </string>
     <string name="genRinex_empty">-Select survey-</string>
     <string name="genRinex_acqFiles">Raw data files</string>
-    <string name="genRinex_genFiles">Generate RINEX files for points selected</string>
+    <string name="genRinex_genFiles">Generate RINEX files for raw data files selected</string>
     <string name="genRinex_singleFile">One for each selected</string>
     <string name="genRinex_multipleFile">One file for all</string>
-    <string name="genRinex_rinexFiles">Existing RINEX files</string>
+    <string name="genRinex_rinexFiles">Already generated RINEX files</string>
     <string name="genRinex_surveyNotSel">Survey not selected</string>
+    <string name="genRinex_retCodeOK">OK, RINEX file(s) generated</string>
+    <string name="genRinex_retCodeERR">ERROR when generating RINEX:</string>
+    <string name="genRinex_retERR_OPENRAW">Opening raw file</string>
+    <string name="genRinex_retERR_READRAW">Reading raw data</string>
+    <string name="genRinex_retERR_CREOBS">Creating observation file</string>
+    <string name="genRinex_retERR_WRIOBS">Writing observation data</string>
+    <string name="genRinex_retERR_CRENAV">Creating navigation file</string>
+    <string name="genRinex_retERR_WRINAV">Writing navigation data</string>
+    <string name="genRinex_retERR_UNK">Unknown error</string>
     <!-- Info help -->
     <string name="setting_activity_info_title">General information</string>
     <string name="setting_activity_info_body">&lt;p>This application generates RINEX observation files from GNSS raw data acquired from the GPS/GNSS receiver.&lt;/p>
         &lt;p>To do it follow the steps in the list:&lt;/p>
         &lt;ol>
         &lt;li>Setup the parameters for data acquisition&lt;/li>
-        &lt;li>Perform the acquisition saving observation and navigation raw data in files&lt;/li>
-        &lt;li>Setup data for RINEX files headers and parameter for data conversion&lt;/li>
+        &lt;li>Perform the acquisition, saving observation and navigation raw data in files&lt;/li>
+        &lt;li>Setup metadata for RINEX files and parameters to generate them&lt;/li>
         &lt;li>Select the raw data files to be converted to RINEX&lt;/li>
         &lt;/ol>
         &lt;br>&lt;p>The application  stores the raw data and RINEX files in the public &lt;em>Documents&lt;/em> directory.&lt;/p>
-        &lt;br>&lt;p>The user has to give permissions to the application to access the Positioning service and the Documents  directory for a correct functioning.&lt;/p>
+        &lt;br>&lt;p>For a correct functioning, the user has to give permissions to the application to access the &lt;em>Positioning service&lt;/em> and the &lt;em>Documents&lt;/em> directory.&lt;&lt;/p>
         &lt;br>&lt;p>&lt;font color="red">CREDITS&lt;/font>&lt;/p>
-        &lt;p>toRINEX V1.0, October 2018&lt;/p>
+        &lt;p>toRINEX LITE V1.0, November 2018&lt;/p>
         &lt;p>This application has been developed using Android Studio 3.0.1 and tested in a Nexus 5X with Android 7.1.2&lt;/p>
         &lt;br>&lt;p>Contact: gnss.apps@gmail.com &lt;/p>
     </string>
     <string name="setup_acquisition_info_title">Information on setup for acquisition</string>
     <string name="setup_acquisition_info_body">&lt;p>Each acquisition of GNSS raw data is performed with the receiver/phone placed in a fixed point.&lt;/p>
-        &lt;p>All raw data for this point will be stored in an Observation Raw Data file (ORD extension).&lt;/p>
+        &lt;p>All raw collected in a given point will be stored in an Observation Raw Data file (ORD extension)&lt;/p>
         &lt;br>&lt;p>A Survey is a set of files containing measurements from several points. The survey name is used to create a directory where all files related to this survey will be placed.&lt;/p>
         &lt;p>The proposed survey names have the format&lt;/p>
-        &lt;p>S_year_month_day_hour_minute&lt;/p>
+        &lt;p>SYearMonthDay_Hour_Minute&lt;/p>
         &lt;p>being them related to the current local time.&lt;/p>
-        &lt;br>&lt;p>Observation raw data are grouped by epochs, each one containing the set of measurements taken by the receiver in this epoch from all satellites in view.&lt;/p>
+        &lt;br>&lt;p>Observation raw data in each ORD file are grouped by epochs, each one containing the set of measurements taken by the receiver in this epoch from all satellites in view.&lt;/p>
         &lt;p>The user has to select the number of epochs to be collected for each point, and the epochs interval in seconds.&lt;/p>
-        &lt;br>&lt;p>Some devices are able to provide data transmitted in the satellites navigation messages. The user can select if such data would be acquired or not.&lt;/p>
-        &lt;p>All navigation data taken during a survey would be stored in a unique Navigation Raw Data file (NRD extension).&lt;/p>
+        &lt;br>&lt;p>Some devices are able to provide data transmitted inside satellites navigation messages. The user can select if such data would be acquired or not.&lt;/p>
+        &lt;p>If acquired, all navigation data taken during a survey would be stored in a unique Navigation Raw Data file (NRD extension).&lt;/p>
     </string>
     <string name="perform_acquisition_info_title">Information on performing acquisition</string>
     <string name="perform_acquisition_info_body">&lt;p>The upper half window shows the status of the satellites being tracked.&lt;/p>
-        &lt;p>It can take some time this information to be available, depending on the status of the receiver (cold or warm start, aided data available, etc.) and the visibility of the satellites from the location.&lt;/p>
+        &lt;p>It can take some time this information to be available, depending on the status of the receiver (cold or warm start, aid data available, etc.) and the visibility of the satellites.&lt;/p>
         &lt;br>&lt;p>The status presented includes data on epoch time (GPS week and Time of Week), and for each satellite its identification, tracking status, signal to noise ration, and observables available (in black) or not available (in red).&lt;/p>
         &lt;p>Satellites and observables are named using RINEX rules.&lt;/p>
         &lt;br>&lt;p>Also it is given a message on availability of navigation messages data.&lt;/p>
-        &lt;br>&lt;p>To start acquisition in a given point, the user shall press the START ACQUISITION button. The progress bar will inform on the acquisition progress.&lt;/p>
+        &lt;br>&lt;p>To start data acquisition in a given point, the user shall press the START ACQUISITION button. The progress bar will inform on the acquisition progress.&lt;/p>
         &lt;p>If it is pressed STOP ACQUISITION the acquisition process for this point would be aborted and no ORD file would be created.&lt;/p>
         &lt;br>&lt;p>The name of the ORD files have the format P_minute_second.ORD, being minute and second of the local time at the acquisition start.&lt;/p>
         &lt;br>&lt;p>Information on the current survey and already acquired ORD files is shown below the progress bar.&lt;/p>
     </string>
     <string name="setup_RINEX_info_title">Information on setup for RINEX generation</string>
-    <string name="setup_RINEX_info_body">&lt;p>Before generating RINEX files it is necessary to provide data to be include in the RINEX header records. Meaning of data to be provided can be found in the Receiver Independent Exchange Format (RINEX) documents available from the International GNSS Service (IGS).
+    <string name="setup_RINEX_info_body">&lt;p>Before generating RINEX files it is necessary to provide metadata to be include in the RINEX header records. Meaning of data to be provided can be found in the Receiver Independent Exchange Format (RINEX) documents available from the International GNSS Service (IGS).
         &lt;br>&lt;p>Also the user can provide parameters that would affect filtering of data to be used to generate files, like constellations, satellites and observables.
         &lt;br>&lt;p>When generating RINEX files it is created a log file. The user can define the wanted level of logging to be used (from INFO to FINEST).
     </string>
     <string name="generate_RINEX_info_title">Information on RINEX files generation</string>
-    <string name="generate_RINEX_info_body">&lt;p>The generation of the RINEX files starts with the selection of the files with the raw data to be used to generate the RINEX files. The user do that selecting the survey from the list of existing ones, and then raw data files to be used in the list.&lt;/p>
+    <string name="generate_RINEX_info_body">&lt;p>To generate RINEX files select first the raw data to be used. To do that it is necessary to select the survey from the list of existing ones, and then the raw data files to be used.&lt;/p>
         &lt;p>RINEX observation files can be generated when ORD files are selected.&lt;/p>
-        &lt;p>A RINEX navigation file can be generated when NRD file is selected.&lt;/p>
+        &lt;p>RINEX navigation files can be generated when the NRD file is selected.&lt;/p>
         &lt;br>&lt;p>Press ONE FILE FOR ALL button to generate a unique RINEX observation file for all ORD files selected. Event flag records of type &lt;em>new site occupation&lt;/em> will be inserted to separate epochs from the different files&lt;/p>
-        &lt;br>&lt;p>Press ONE FOR EACH SELECTED button to generate a RINEX file for each ORD or NRD file selected&lt;/p>
-        &lt;br>&lt;p>The list of existing RINEX files in the survey will be displayed below buttons. They are located in the RINEX subdirectory inside the survey directory.&lt;/p>
+        &lt;br>&lt;p>Press ONE FOR EACH SELECTED button to generate a RINEX file for each ORD selected&lt;/p>
+        &lt;br>&lt;p>The list of existing RINEX files in the survey is displayed below above buttons. They are located in the RINEX subdirectory inside the survey directory.&lt;/p>
         &lt;br>&lt;p>All files generated by this version of the application (ORD, NRD, log, RINEX observation) are text files, and you can use a file manager to access them and a text editor to display their contents.&lt;/p>
     </string>
 </resources>

@@ -35,7 +35,6 @@
         android:text="@string/genRinex_acqFiles"
         android:gravity="center"
         />
-
     <ListView
         android:id="@+id/perf_genRinex_fileList"
         android:layout_width="fill_parent"
@@ -44,6 +43,7 @@
         android:choiceMode="multipleChoice"
         android:scrollbars="vertical" />
     <!-- android:layout_below="@+id/perf_genRinex_surveyList"-->
+    <View style="@style/Divider" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0px"
@@ -82,8 +82,7 @@
         android:id="@+id/perf_genRinex_rinexFiles"
         android:layout_width="fill_parent"
         android:layout_height="0px"
-        android:layout_weight="3
-"
+        android:layout_weight="3"
         android:scrollbars="vertical"
         />
     <!--android:layout_below="@+id/perf_genRinex_fileList" android:lines="5"  -->

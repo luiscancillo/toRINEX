@@ -260,7 +260,24 @@ public class GenerateRinex extends AppCompatActivity {
                 selectedOnrdFiles.toArray(new String[0]),
                 makeRinexDir(srvPath),
                 setOutParams());
+        int retCode = Integer.parseInt(response);
+        if (retCode == 0) {
+            response = getString(R.string.genRinex_retCodeOK);
+        }
+        else {
+            response = getString(R.string.genRinex_retCodeERR);
+            if ((retCode & RET_ERR_OPENRAW) != 0) response += getString(R.string.genRinex_retERR_OPENRAW);
+            else if ((retCode & RET_ERR_READRAW) != 0) response += getString(R.string.genRinex_retERR_READRAW);
+            else if ((retCode & RET_ERR_WRINAV) != 0) response += getString(R.string.genRinex_retERR_CREOBS);
+            else if ((retCode & RET_ERR_WRIOBS) != 0) response += getString(R.string.genRinex_retERR_WRIOBS);
+            else if ((retCode & RET_ERR_CRENAV) != 0) response += getString(R.string.genRinex_retERR_CRENAV);
+            else response += getString(R.string.genRinex_retERR_UNK);
+        }
         Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
+        //now update the list of RINEX files
+        fillFromDir(existingRinexFiles, surveySubdir + RINEX_FILES_DIRECTORY, true);
+        genRinex_existingRinexFiles.setText("");
+        for (String rf : existingRinexFiles) genRinex_existingRinexFiles.append(rf + "\n");
     }
     //JNI methods
     public native String generateRinexFilesJNI(int toDo, String inFilesPath, String[] infilesName, String outfilesPath, String[] outParams);
