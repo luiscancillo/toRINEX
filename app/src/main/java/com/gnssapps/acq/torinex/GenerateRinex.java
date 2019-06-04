@@ -214,12 +214,13 @@ public class GenerateRinex extends AppCompatActivity {
                 sharedPref.getString("rinex_loglevel", getString(R.string.pref_default_rinex_loglevel)));
         params.add(Integer.toString(Constants.MT_RINEXVER) + SEMICOLON +
                 sharedPref.getString("rinex_version", getString(R.string.pref_default_rinex_version)));
-        params.add(Integer.toString(Constants.MT_SITE) + SEMICOLON +
-                sharedPref.getString("rinex_site", getString(R.string.pref_default_rinex_unknown)));
+//        params.add(Integer.toString(Constants.MT_SITE) + SEMICOLON +
+//                sharedPref.getString("rinex_site", getString(R.string.pref_default_rinex_unknown)));
         params.add(Integer.toString(Constants.MT_RUN_BY) + SEMICOLON +
                 sharedPref.getString("rinex_runby", getString(R.string.pref_default_rinex_unknown)));
-        params.add(Integer.toString(Constants.MT_MARKER_NAME) + SEMICOLON +
-                sharedPref.getString("rinex_markername", getString(R.string.pref_default_rinex_unknown)));
+        String anString = sharedPref.getString("rinex_markername", getString(R.string.pref_default_rinex_unknown));
+        if (anString.compareTo(getString(R.string.pref_default_rinex_unknown)) == 0) anString = "";
+        params.add(Integer.toString(Constants.MT_MARKER_NAME) + SEMICOLON + anString);
         params.add(Integer.toString(Constants.MT_MARKER_TYPE) + SEMICOLON +
                 sharedPref.getString("rinex_markertype", getString(R.string.pref_default_rinex_unknown)));
         params.add(Integer.toString(Constants.MT_OBSERVER) + SEMICOLON +

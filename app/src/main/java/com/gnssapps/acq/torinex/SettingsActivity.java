@@ -288,7 +288,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Bind the summaries of preferences to their values.
             // When their values change, their summaries are updated to reflect the new value.
             bindPreferenceSummaryToValue(findPreference("rinex_version"));
-            bindPreferenceSummaryToValue(findPreference("rinex_site"));
+//            bindPreferenceSummaryToValue(findPreference("rinex_site"));
             bindPreferenceSummaryToValue(findPreference("rinex_runby"));
             bindPreferenceSummaryToValue(findPreference("rinex_markername"));
             bindPreferenceSummaryToValue(findPreference("rinex_markertype"));

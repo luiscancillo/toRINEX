@@ -28,7 +28,6 @@
         android:editable="false"
         android:key="total_epochs"
         android:maxLines="1"
-        android:enabled="false"
         android:singleLine="true"
         android:title="@string/pref_title_total_epochs" />
     <SwitchPreference
@@ -36,6 +35,5 @@
         android:key="acquire_nav_message"
         android:summaryOn="@string/pref_summaryOn_acquire_nav_message"
         android:summaryOff="@string/pref_summaryOff_acquire_nav_message"
-        android:enabled="false"
         android:defaultValue="false" />
 </PreferenceScreen>

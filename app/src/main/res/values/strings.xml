@@ -60,7 +60,6 @@
         <item>3.02</item>
     </string-array>
     <string name="pref_default_rinex_version">2.10</string>
-    <string name="pref_title_rinex_site">Site name (for RINEX file names)</string>
     <string name="pref_title_rinex_runby">RUN BY header field</string>
     <string name="pref_title_rinex_markername">MARKER NAME header record</string>
     <string name="pref_title_rinex_markertype">MARKER TYPE header record</string>
@@ -86,7 +85,6 @@
     <string name="pref_default_rinex_zero">0</string>
     <string name="pref_default_rinex_one">1</string>
     <string name="pref_default_rinex_markertype">HUMAN</string>
-    <string name="pref_default_rinex_site">SSSS</string>
     <string name="pref_title_rinex_constellations">Constellations to EXCLUDE in RINEX files</string>
     <string-array name="pref_rinex_constellations">
         <item>GPS</item>
@@ -112,23 +110,37 @@
         <item>C1C pseudorange</item>
         <item>L1C carrier phase</item>
         <item>D1C doppler</item>
-        <item>C1A pseudorange</item>
-        <item>L1A carrier phase</item>
-        <item>D1A doppler</item>
-        <item>C1X pseudorange</item>
-        <item>L1X carrier phase</item>
-        <item>D1X doppler</item>
+        <item>S1C signal strength</item>
+        <item>C1I pseudorange</item>
+        <item>L1I carrier phase</item>
+        <item>D1I doppler</item>
+        <item>S1I signal strength</item>
+        <item>C1B pseudorange</item>
+        <item>L1B carrier phase</item>
+        <item>D1B doppler</item>
+        <item>S1B signal strength</item>
+        <item>C5X pseudorange</item>
+        <item>L5X carrier phase</item>
+        <item>D5X doppler</item>
+        <item>S5X signal strength</item>
     </string-array>
     <string-array name="pref_rinex_observables_values">
         <item>C1C</item>
         <item>L1C</item>
         <item>D1C</item>
-        <item>C1A</item>
-        <item>L1A</item>
-        <item>D1A</item>
-        <item>C1X</item>
-        <item>L1X</item>
-        <item>D1X</item>
+        <item>S1C</item>
+        <item>C1I</item>
+        <item>L1I</item>
+        <item>D1I</item>
+        <item>S1I</item>
+        <item>C1B</item>
+        <item>L1B</item>
+        <item>D1B</item>
+        <item>S1B</item>
+        <item>C5X</item>
+        <item>L5X</item>
+        <item>D5X</item>
+        <item>S5X</item>
     </string-array>
     <string-array name="pref_default_rinex_observables">
     </string-array>
@@ -181,8 +193,8 @@
         &lt;br>&lt;p>The application  stores the raw data and RINEX files in the public &lt;em>Documents&lt;/em> directory.&lt;/p>
         &lt;br>&lt;p>For a correct functioning, the user has to give permissions to the application to access the &lt;em>Positioning service&lt;/em> and the &lt;em>Documents&lt;/em> directory.&lt;&lt;/p>
         &lt;br>&lt;p>&lt;font color="red">CREDITS&lt;/font>&lt;/p>
-        &lt;p>toRINEX LITE V1.0, November 2018&lt;/p>
-        &lt;p>This application has been developed using Android Studio 3.0.1 and tested in a Nexus 5X with Android 7.1.2&lt;/p>
+        &lt;p>toRINEX LITE V2.0, June 2019&lt;/p>
+        &lt;p>This application has been developed using Android Studio 3.0.1 and tested in Nexus 5X with Android 7.1.2 and Xiaomi Mi 8 with Android 9&lt;/p>
         &lt;br>&lt;p>Contact: gnss.apps@gmail.com &lt;/p>
     </string>
     <string name="setup_acquisition_info_title">Information on setup for acquisition</string>
@@ -191,7 +203,8 @@
         &lt;br>&lt;p>A Survey is a set of files containing measurements from several points. The survey name is used to create a directory where all files related to this survey will be placed.&lt;/p>
         &lt;p>The proposed survey names have the format&lt;/p>
         &lt;p>SYearMonthDay_Hour_Minute&lt;/p>
-        &lt;p>being them related to the current local time.&lt;/p>
+        &lt;p>Each file having data for a point has the name format PHour_Minute_Second&lt;/p>
+        &lt;p>Time values are from the current local time.&lt;/p>
         &lt;br>&lt;p>Observation raw data in each ORD file are grouped by epochs, each one containing the set of measurements taken by the receiver in this epoch from all satellites in view.&lt;/p>
         &lt;p>The user has to select the number of epochs to be collected for each point, and the epochs interval in seconds.&lt;/p>
         &lt;br>&lt;p>Some devices are able to provide data transmitted inside satellites navigation messages. The user can select if such data would be acquired or not.&lt;/p>
