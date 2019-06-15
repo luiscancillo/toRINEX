@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.gnssapps.acq.torinex"
         minSdkVersion 25
-        targetSdkVersion 26
-        versionCode 1
-        versionName 'Lite'
+        targetSdkVersion 28
+        versionCode 2
+        versionName 'Lite 2'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -15,7 +15,7 @@ android {
                 arguments "-DANDROID_STL=c++_shared"
             }
         }
-        versionNameSuffix '1.0'
+        versionNameSuffix '1.2'
     }
     buildTypes {
         release {

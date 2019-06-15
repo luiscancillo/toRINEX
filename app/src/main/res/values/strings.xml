@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">to RINEX Lite</string>
+    <string name="app_name">to RINEX Lite2</string>
     <string name="app_reqAPIlevel">This application requires Android 7.1 or higher</string>
     <string name="app_perm_OK">Permissions GRANTED</string>
     <string name="app_perm_NOK">Permissions NOT granted. Cannot continue</string>
@@ -28,7 +28,7 @@
 
     <!-- GNSS data acquisition -->
     <string name="dataAcq_header">Perform GNSS data acquisition</string>
-    <string name="dataAcq_satStatTitle">"Tracked satellites data status"</string>
+    <string name="dataAcq_satStatTitle">"Waiting for GNSS raw data from receiver"</string>
     <string name="dataAcq_navStateTitle">"Navigation data status"</string>
     <string name="dataAcq_startStop_txtOff">START ACQUISITION</string>
     <string name="dataAcq_startStop_txtOn">STOP ACQUISITION</string>

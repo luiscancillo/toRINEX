@@ -19,30 +19,35 @@
         android:singleLine="true" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_markername"
+        android:enabled="false"
         android:key="rinex_markername"
         android:defaultValue="@string/pref_default_rinex_unknown"
         android:maxLines="1"
         android:singleLine="true" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_markertype"
+        android:enabled="false"
         android:key="rinex_markertype"
         android:defaultValue="@string/pref_default_rinex_markertype"
         android:maxLines="1"
         android:singleLine="true" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_observer"
+        android:enabled="false"
         android:key="rinex_observer"
         android:defaultValue="@string/pref_default_rinex_unknown"
         android:maxLines="1"
         android:singleLine="true" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_agency"
+        android:enabled="false"
         android:key="rinex_agency"
         android:defaultValue="@string/pref_default_rinex_unknown"
         android:maxLines="1"
         android:singleLine="true" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_receivernumber"
+        android:enabled="false"
         android:key="rinex_receivernumber"
         android:defaultValue="@string/pref_default_rinex_one"
         android:maxLines="1"
@@ -56,12 +61,14 @@
         android:key="rinex_comment" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_markernumber"
+        android:enabled="false"
         android:key="rinex_markernumber"
         android:defaultValue="@string/pref_default_rinex_one"
         android:maxLines="1"
         android:singleLine="true" />
     <ListPreference
         android:title="@string/pref_title_rinex_clkoffs"
+        android:enabled="false"
         android:key="rinex_clkoffs"
         android:entries="@array/pref_rinex_clkoffs"
         android:entryValues="@array/pref_rinex_clkoffs_values"
@@ -74,23 +81,27 @@
         android:key="rinex_categoryselect" >
     <SwitchPreference
         android:title="@string/pref_title_rinex_fitinterval"
+        android:enabled="false"
         android:key="rinex_fitinterval"
         android:summaryOff="@string/pref_summaryOff_rinex_fitinterval"
         android:summaryOn="@string/pref_summaryOn_rinex_fitinterval"
         android:defaultValue="true" />
     <MultiSelectListPreference
         android:title="@string/pref_title_rinex_constellations"
+        android:enabled="false"
         android:key="rinex_constellations"
         android:entries="@array/pref_rinex_constellations"
         android:entryValues="@array/pref_rinex_constellations_values"
         android:defaultValue="@array/pref_default_rinex_constellations" />
     <EditTextPreference
         android:title="@string/pref_title_rinex_satellites"
+        android:enabled="false"
         android:key="rinex_satellites"
         android:maxLines="1"
         android:singleLine="true" />
     <MultiSelectListPreference
         android:title="@string/pref_title_rinex_observables"
+        android:enabled="false"
         android:key="rinex_observables"
         android:entries="@array/pref_rinex_observables"
         android:entryValues="@array/pref_rinex_observables_values"
