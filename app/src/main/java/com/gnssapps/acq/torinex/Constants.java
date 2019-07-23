@@ -50,10 +50,16 @@ public class Constants {
     //The type of messages that GNSS Raw Data files or setup arguments can contain
     public static final int MT_EPOCH = 1;    //Epoch data
     public static final int MT_SATOBS = 2;   //Satellite observations data
-    public static final int MT_SATNAV_GPS_l1_CA = 10;   //Satellite navigation data from GPS L1 C/A
+    public static final int MT_SATNAV_GPS_L1_CA = 10;   //Satellite navigation data from GPS L1 C/A
     public static final int MT_SATNAV_GLONASS_L1_CA = 11;   //Satellite navigation data from GLONASS L1 C/A
-    public static final int MT_SATNAV_GALILEO_FNAV = 12;   //Satellite navigation data from Galileo F/NAV
-    public static final int MT_SATNAV_BEIDOU_D1 = 13;   //Satellite navigation data from Beidou D1 & D2
+    public static final int MT_SATNAV_GALILEO_INAV = 12;   //Satellite navigation data from Galileo I/NAV
+    public static final int MT_SATNAV_GALILEO_FNAV = 13;   //Satellite navigation data from Galileo F/NAV
+    public static final int MT_SATNAV_BEIDOU_D1 = 14;   //Satellite navigation data from Beidou D1
+    public static final int MT_SATNAV_GPS_L5_C = 15;   //Satellite navigation data from GPS L5 C
+    public static final int MT_SATNAV_GPS_C2 = 16;   //Satellite navigation data from GPS C2
+    public static final int MT_SATNAV_GPS_L2_C = 17;   //Satellite navigation data from GPS L2 C
+    public static final int MT_SATNAV_BEIDOU_D2 = 18;   //Satellite navigation data from Beidou D1
+    public static final int MT_SATNAV_UNKNOWN = 40;   //Satellite navigation data unknown type
     public static final int MT_GRDVER = 50;    //Observation or navigation raw data files version
     public static final int MT_PGM = 51;       //Program used to generate data (toRINEX Vx.x)
     public static final int MT_DVTYPE = 52;   //Device type

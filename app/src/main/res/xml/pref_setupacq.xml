@@ -25,14 +25,14 @@
         android:positiveButtonText="@null" />
     <EditTextPreference
         android:title="@string/pref_title_total_epochs"
-        android:enabled="false"
+        android:enabled="@string/enable_field"
         android:defaultValue="@string/pref_default_total_epochs"
         android:key="total_epochs"
         android:maxLines="1"
         android:singleLine="true" />
     <SwitchPreference
         android:title="@string/pref_title_acquire_nav_message"
-        android:enabled="false"
+        android:enabled="@string/enable_field"
         android:key="acquire_nav_message"
         android:summaryOn="@string/pref_summaryOn_acquire_nav_message"
         android:summaryOff="@string/pref_summaryOff_acquire_nav_message"

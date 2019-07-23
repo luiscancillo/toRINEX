@@ -254,7 +254,7 @@ public class PerformDataAcq extends AppCompatActivity {
 				if(dataAcq_startStop.isChecked()) {
 					// The toggle is enabled. Start acquisition
 					Calendar calendar = Calendar.getInstance();
-					String fileName = String.format("P%tH_%tM_%tS",calendar, calendar,calendar);
+					String fileName = String.format("P%tH_%tM_%tS",calendar, calendar, calendar);
 					if (createObsStore(survey, fileName)) {
 						storeEpoch = true;
 						epochCounter = 0;
@@ -303,7 +303,11 @@ public class PerformDataAcq extends AppCompatActivity {
 			acquisitionRateMs = TimeUnit.SECONDS.toMillis(1L);
 		}
 		acquireNavData = sharedPref.getBoolean("acquire_nav_message", false);
-		if (acquireNavData) acquireNavData = createNavStore(survey);
+		if (acquireNavData) {
+			Calendar calendar = Calendar.getInstance();
+			String fileName = String.format("N%tH_%tM_%tS",calendar, calendar, calendar);
+			acquireNavData = createNavStore(survey, fileName);
+		}
 	}
 	@Override
 	public void onStart() {
@@ -564,25 +568,46 @@ public class PerformDataAcq extends AppCompatActivity {
 	private void saveGnssNavMessage(GnssNavigationMessage event) {
 		//get status, satellite and navigation message data
 		int status = event.getStatus();
-		int constellation = event.getType();
+		int navMsgType = event.getType();
 		int satellite = event.getSvid();
-		int pageFrame = event.getMessageId();
-		int subframe = event.getSubmessageId();
+		int navMsgId = event.getMessageId();
+		int navMsgSubId = event.getSubmessageId();
 		byte[] navMsg = event.getData();
 		//store data according to the type of message
-		switch (constellation) {
+		//TODO add a feature to filter data not used to generate RINEX files
+		switch (navMsgType) {
 			case GnssNavigationMessage.TYPE_GPS_L1CA:
-				storeNavMsg(Constants.MT_SATNAV_GPS_l1_CA, status,'G', satellite, subframe, pageFrame, 40, navMsg);
+				storeNavMsg(Constants.MT_SATNAV_GPS_L1_CA, status,'G', satellite, navMsgSubId, navMsgId, 40, navMsg);
+				break;
+			case GnssNavigationMessage.TYPE_GPS_L5CNAV:
+				//TODO add feature to save this message
+				storeNavMsg(Constants.MT_SATNAV_GPS_L5_C, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
+				break;
+			case GnssNavigationMessage.TYPE_GPS_CNAV2:
+				//TODO add feature to save this message
+				storeNavMsg(Constants.MT_SATNAV_GPS_C2, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
+				break;
+			case GnssNavigationMessage.TYPE_GPS_L2CNAV:
+				//TODO add feature to save this message
+				storeNavMsg(Constants.MT_SATNAV_GPS_L2_C, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_BDS_D1:
-				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D1, status, 'C', satellite, subframe, pageFrame, 40, navMsg);
+				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D1, status, 'C', satellite, navMsgSubId, navMsgId, 40, navMsg);
+				break;
+			case GnssNavigationMessage.TYPE_BDS_D2:
+				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D2, status, 'C', satellite, navMsgSubId, navMsgId, 40, navMsg);
+				break;
+			case GnssNavigationMessage.TYPE_GAL_I:
+				//For Galileo I/NAV, each page contains 2 page parts, even and odd, with a total of 2x114 = 228 bits (sync & tail symbols excluded).
+				//Each word should be fit into 29-bytes, with MSB first (skip B229, B232)
+				storeNavMsg(Constants.MT_SATNAV_GALILEO_INAV, status, 'E', satellite, navMsgSubId, navMsgId, 29, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GAL_F:
 				//For Galileo F/NAV, each word consists of 238-bit (sync & tail symbols excluded).
 				//Each word should be fit into 30-bytes, with MSB first (skip B239, B240)
 				//TODO: solve the following doubt
-				//if ((subframe>0 && subframe<4) || (subframe==4 && pageFrame==18)) {
-					storeNavMsg(Constants.MT_SATNAV_GALILEO_FNAV, status, 'E', satellite, subframe, pageFrame, 30, navMsg);
+				//if ((navMsgSubId>0 && navMsgSubId<4) || (navMsgSubId==4 && navMsgId==18)) {
+				storeNavMsg(Constants.MT_SATNAV_GALILEO_FNAV, status, 'E', satellite, navMsgSubId, navMsgId, 30, navMsg);
 				//}
 				break;
 			case GnssNavigationMessage.TYPE_GLO_L1CA:
@@ -590,9 +615,12 @@ public class PerformDataAcq extends AppCompatActivity {
 				//These bits should be fit into 11 bytes, with MSB first (skip B86-B88),
 				//covering a time period of 2 seconds
 				//TODO solve the following doubt
-				//if ((subframe>0 && subframe<4) || (subframe==4 && pageFrame==18)) {
-					storeNavMsg(Constants.MT_SATNAV_GLONASS_L1_CA, status, 'R', satellite, subframe, pageFrame, 11, navMsg);
+				//if ((navMsgSubId>0 && navMsgSubId<4) || (navMsgSubId==4 && navMsgId==18)) {
+					storeNavMsg(Constants.MT_SATNAV_GLONASS_L1_CA, status, 'R', satellite, navMsgSubId, navMsgId, 11, navMsg);
 				//}
+				break;
+			case GnssNavigationMessage.TYPE_UNKNOWN:
+				storeNavMsg(Constants.MT_SATNAV_UNKNOWN, status, 'U', satellite, navMsgSubId, navMsgId, 0, navMsg);
 				break;
 			default:
 				break;
@@ -636,17 +664,20 @@ public class PerformDataAcq extends AppCompatActivity {
 	}
 	/**
 	 * createNavStore created a file to store GNSS navigation raw data acquired from receiver.
-	 * The file is created to store raw data for a given survey.
+	 * The file is created to store raw data for a given acquisition period in a survey.
 	 * The file is created in a directory where all survey data are stored.
 	 * The related File is saved in the gnssNavFile, and the associated PrintStream in gnssNavOut
 	 * for further use.
 	 * @param intoDir the directory name where the file will be created. It is the survey name.
+	 * @param forAcq the name of the file to be created which is related to an acquisition period
 	 * @return true is the file has been created, false otherwise
 	 */
-	private boolean createNavStore(String intoDir) {
+	private boolean createNavStore(String intoDir, String forAcq) {
 		try {
 			File gnssDir = createAppDirStore(intoDir);
-			gnssNavFile = new File(gnssDir, Constants.NRD_FILE_NAME);
+//			gnssNavFile = new File(gnssDir, Constants.NRD_FILE_NAME);
+			gnssNavFile = new File(gnssDir, forAcq + NRD_FILE_EXTENSION);
+			//new FileWriter(gnssNavFile, true);
 			gnssNavOut = new PrintStream(gnssNavFile);
 			storeRxIdMsg(gnssNavOut, NRD_FILE_EXTENSION, NRD_FILE_VERSION, false);
 			return true;
@@ -784,14 +815,14 @@ public class PerformDataAcq extends AppCompatActivity {
 	 * @param msgType the message type to be gerated. It depends on the satellite / constellation
 	 * @param cnsID the constellation identifier (G, R, E, etc.)
 	 * @param sat the satellite number in the constellation
-	 * @param subfrm the subframe number of the navigation message
-	 * @param page the page number of the message
+	 * @param navMsgSubId the  sub-message identifier, relevant to the navMsgType of the message (subframe, string, page, word, ...)
+	 * @param navMsgId an index to help with complete Navigation Message assembly (frame id, -1, frame nuber, subframe number, ...)
 	 * @param msgSize the message size (number of bytes in the message)
 	 * @param msg the navigation message data
 	 */
-	private void storeNavMsg(int msgType, int stat, char cnsID, int sat, int subfrm, int page, int msgSize, byte[] msg) {
+	private void storeNavMsg(int msgType, int stat, char cnsID, int sat, int navMsgSubId, int navMsgId, int msgSize, byte[] msg) {
 		try {
-			gnssNavOut.printf(Locale.US, "%d;%d;%c%02d;%d;%d;%d", msgType, stat, cnsID, sat, subfrm, page, msgSize);
+			gnssNavOut.printf(Locale.US, "%d;%d;%c%02d;%d;%d;%d", msgType, stat, cnsID, sat, navMsgSubId, navMsgId, msgSize);
 			for (int i = 0; i < msgSize; i++) gnssNavOut.printf(Locale.US, ";%02X", msg[i]);
 			gnssNavOut.printf(Locale.US, "\n");
 		} catch (IllegalFormatException e) {
