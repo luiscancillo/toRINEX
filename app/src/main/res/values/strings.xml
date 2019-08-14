@@ -83,6 +83,7 @@
     <string name="pref_summaryOn_rinex_fitinterval">Set interval value to duty cycle and include only one measurement per cycle.</string>
     <string name="pref_summaryOff_rinex_fitinterval">Keep interval value stated and include all measurements taken</string>
     <string name="pref_default_rinex_unknown">Not known</string>
+    <string name="pref_default_rinex_empty"> </string>
     <string name="pref_default_rinex_zero">0</string>
     <string name="pref_default_rinex_one">1</string>
     <string name="pref_default_rinex_markertype">HUMAN</string>

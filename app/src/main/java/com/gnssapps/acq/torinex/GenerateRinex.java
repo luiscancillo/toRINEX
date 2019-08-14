@@ -230,7 +230,7 @@ public class GenerateRinex extends AppCompatActivity {
         params.add(Integer.toString(Constants.MT_RECNUM) + SEMICOLON +
                 sharedPref.getString("rinex_receivernumber", getString(R.string.pref_default_rinex_one)));
         params.add(Integer.toString(Constants.MT_COMMENT) + SEMICOLON +
-                sharedPref.getString("rinex_comment", getString(R.string.pref_default_rinex_unknown)));
+                sharedPref.getString("rinex_comment", getString(R.string.pref_default_rinex_empty)));
         params.add(Integer.toString(Constants.MT_MARKER_NUM) + SEMICOLON +
                 sharedPref.getString("rinex_markernumber", getString(R.string.pref_default_rinex_one)));
         params.add(Integer.toString(Constants.MT_CLKOFFS) + SEMICOLON +

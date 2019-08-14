@@ -574,50 +574,47 @@ public class PerformDataAcq extends AppCompatActivity {
 		int navMsgSubId = event.getSubmessageId();
 		byte[] navMsg = event.getData();
 		//store data according to the type of message
-		//TODO add a feature to filter data not used to generate RINEX files
 		switch (navMsgType) {
 			case GnssNavigationMessage.TYPE_GPS_L1CA:
-				storeNavMsg(Constants.MT_SATNAV_GPS_L1_CA, status,'G', satellite, navMsgSubId, navMsgId, 40, navMsg);
+				//only subframes 1, 2 & 3, and page 18 in subframe 4 have RINEX nav data
+				if (((navMsgSubId > 0) && (navMsgSubId < 4)) || ((navMsgSubId == 4) && (navMsgId == 18))) {
+					storeNavMsg(Constants.MT_SATNAV_GPS_L1_CA, status, 'G', satellite, navMsgSubId, navMsgId, 40, navMsg);
+				}
 				break;
 			case GnssNavigationMessage.TYPE_GPS_L5CNAV:
-				//TODO add feature to save this message
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_GPS_L5_C, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GPS_CNAV2:
-				//TODO add feature to save this message
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_GPS_C2, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GPS_L2CNAV:
-				//TODO add feature to save this message
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_GPS_L2_C, status,'G', satellite, navMsgSubId, navMsgId, 0, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_BDS_D1:
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D1, status, 'C', satellite, navMsgSubId, navMsgId, 40, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_BDS_D2:
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D2, status, 'C', satellite, navMsgSubId, navMsgId, 40, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GAL_I:
-				//For Galileo I/NAV, each page contains 2 page parts, even and odd, with a total of 2x114 = 228 bits (sync & tail symbols excluded).
-				//Each word should be fit into 29-bytes, with MSB first (skip B229, B232)
-				storeNavMsg(Constants.MT_SATNAV_GALILEO_INAV, status, 'E', satellite, navMsgSubId, navMsgId, 29, navMsg);
+				//only words 1 to 5 have RINEX nav data
+				if ((navMsgSubId > 0) && (navMsgSubId < 6)) {
+					storeNavMsg(Constants.MT_SATNAV_GALILEO_INAV, status, 'E', satellite, navMsgSubId, navMsgId, 29, navMsg);
+				}
 				break;
 			case GnssNavigationMessage.TYPE_GAL_F:
-				//For Galileo F/NAV, each word consists of 238-bit (sync & tail symbols excluded).
-				//Each word should be fit into 30-bytes, with MSB first (skip B239, B240)
-				//TODO: solve the following doubt
-				//if ((navMsgSubId>0 && navMsgSubId<4) || (navMsgSubId==4 && navMsgId==18)) {
+				//TODO add a feature to filter data not used to generate RINEX files
 				storeNavMsg(Constants.MT_SATNAV_GALILEO_FNAV, status, 'E', satellite, navMsgSubId, navMsgId, 30, navMsg);
-				//}
 				break;
 			case GnssNavigationMessage.TYPE_GLO_L1CA:
-				//For Glonass L1 C/A, each string contains 85 data bits, including the checksum.
-				//These bits should be fit into 11 bytes, with MSB first (skip B86-B88),
-				//covering a time period of 2 seconds
-				//TODO solve the following doubt
-				//if ((navMsgSubId>0 && navMsgSubId<4) || (navMsgSubId==4 && navMsgId==18)) {
-					storeNavMsg(Constants.MT_SATNAV_GLONASS_L1_CA, status, 'R', satellite, navMsgSubId, navMsgId, 11, navMsg);
-				//}
+				//only strings 1 to 5 have RINEX data,
+				// but almanac strings (6 to 15) are needed to build the OSN (Orbital Slot Number) - FCN (Frequency Channel Number) table
+				storeNavMsg(Constants.MT_SATNAV_GLONASS_L1_CA, status, 'R', satellite, navMsgSubId, navMsgId, 11, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_UNKNOWN:
 				storeNavMsg(Constants.MT_SATNAV_UNKNOWN, status, 'U', satellite, navMsgSubId, navMsgId, 0, navMsg);
