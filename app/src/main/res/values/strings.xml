@@ -29,6 +29,8 @@
 
     <!-- GNSS data acquisition -->
     <string name="dataAcq_header">Perform GNSS data acquisition</string>
+    <string name="dataAcq_epochTitle">"Epoch time not available"</string>
+    <string name="dataAcq_satStateHeadTitle">"SAT C/N0 Observables     C/N0 Observables"</string>
     <string name="dataAcq_satStatTitle">"Waiting for GNSS raw data from receiver"</string>
     <string name="dataAcq_navStateTitle">"Navigation data status"</string>
     <string name="dataAcq_startStop_txtOff">START ACQUISITION</string>
@@ -40,8 +42,9 @@
     <string name="dataAcq_logMsgs">"Log messages"</string>
     <string name="dataAcq_acqAborted">Acquisition ABORTED for this point</string>
     <string name="dataAcq_navStatus_UNKNOWN">Navigation data status is UNKOWN</string>
-    <string name="dataAcq_navStatus_READY">Navigation data are being received</string>
-    <string name="dataAcq_navStatus_DISABLED">Navigation data reception is disabled</string>
+    <string name="dataAcq_navStatus_READY">Receiving navigation data</string>
+    <string name="dataAcq_navStatus_READYfrom">from:</string>
+    <string name="dataAcq_navStatus_DISABLED">Reception of navigation data is disabled</string>
     <string name="dataAcq_navStatus_NOT_SUPPORTED">This device is unable to provide navigation data</string>
     <string name="dataAcq_badClock">Receiver clock does not change from epoch to epoch</string>
 

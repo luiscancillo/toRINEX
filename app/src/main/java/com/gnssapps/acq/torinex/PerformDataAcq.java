@@ -70,6 +70,7 @@ import static com.gnssapps.acq.torinex.Constants.*;
 public class PerformDataAcq extends AppCompatActivity {
 	//to manage views and their contents
 	private ActionBar appBar;
+	private TextView dataAcq_epoch;
 	private TextView dataAcq_satState;
 	private TextView dataAcq_navState;
 	private TextView dataAcq_survey;
@@ -173,12 +174,16 @@ public class PerformDataAcq extends AppCompatActivity {
 	private boolean storeEpoch; //if epoch data will be stored in a file or not
 	private boolean displayEpoch;   //if epoch data will be displayed or not
 	private ArrayList <satRawData> epochRawData = new ArrayList<satRawData>();
-	private Spanned epochObsTagged; //a place to format satellite observation status (to be displayed) during a epoch
+	private Spanned epochTimeTagged; //a place to format epoch time data to be displayed
+	private Spanned satStateTagged; //a place to format satellite observation state (to be displayed) during a epoch
 	private long acquisitionRateMs; //the rate to acquire epoch data
 	//to save and store acquired navigation data
 	private int navStatus;      //the navigation data acquisition status
+	private String navMsgConstellations;	//the constellations for which receiver is providing navigation message
+	private String navMsgFrom;
 	private Spanned navStatusTagged; //a place to format the navigation data acquisition status
 	private boolean acquireNavData; //if true navigation data would be acquired (if available) and stored
+	private boolean timeNavDataStored;	//if true the time of the first epoch acquired has been stored in the nav file
 	private File gnssNavFile;
 	private PrintStream gnssNavOut;
 
@@ -241,6 +246,7 @@ public class PerformDataAcq extends AppCompatActivity {
 		//to get values from options set in SettingsActivity
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		//get ids for elements in the view and perform their initial settings
+		dataAcq_epoch = (TextView) findViewById(R.id.perf_dataAcq_epoch);
 		dataAcq_satState = (TextView) findViewById(R.id.perf_dataAcq_satState);
 		dataAcq_satState.setMovementMethod(new ScrollingMovementMethod());
 		dataAcq_navState = (TextView) findViewById(R.id.perf_dataAcq_navState);
@@ -254,14 +260,14 @@ public class PerformDataAcq extends AppCompatActivity {
 				if(dataAcq_startStop.isChecked()) {
 					// The toggle is enabled. Start acquisition
 					Calendar calendar = Calendar.getInstance();
-					String fileName = String.format("P%tH_%tM_%tS",calendar, calendar, calendar);
+					String fileName = String.format(Locale.US, "P%tH_%tM_%tS",calendar, calendar, calendar);
 					if (createObsStore(survey, fileName)) {
 						storeEpoch = true;
 						epochCounter = 0;
 						dataAcq_point.setText(fileName);
 						dataAcq_progress.setMax(totalEpochs);
 					} else {
-					 //TODO : the file cannot be created
+					 //TODO : action when the file cannot be created
 					}
 				}
 				else {
@@ -281,6 +287,8 @@ public class PerformDataAcq extends AppCompatActivity {
 		dataAcq_log.setMovementMethod(new ScrollingMovementMethod());
 		//Get a LocationManager
 		navStatus = GnssNavigationMessage.Callback.STATUS_NOT_SUPPORTED;    //default value
+		navMsgConstellations = "";
+		navMsgFrom = "";
 		mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 		mLocationManager.registerGnssMeasurementsCallback(gnssMeasurementsEventListener);
 		mLocationManager.registerGnssNavigationMessageCallback(gnssNavigationMessageListener);
@@ -305,7 +313,7 @@ public class PerformDataAcq extends AppCompatActivity {
 		acquireNavData = sharedPref.getBoolean("acquire_nav_message", false);
 		if (acquireNavData) {
 			Calendar calendar = Calendar.getInstance();
-			String fileName = String.format("N%tH_%tM_%tS",calendar, calendar, calendar);
+			String fileName = String.format(Locale.US, "N%tH_%tM_%tS",calendar, calendar, calendar);
 			acquireNavData = createNavStore(survey, fileName);
 		}
 	}
@@ -424,14 +432,16 @@ public class PerformDataAcq extends AppCompatActivity {
 				epochCounter++;
 				if (storeEpoch && (epochCounter <= totalEpochs))  storeEpochData();
 				if (displayEpoch) {
-					epochObsTagged = formatEpochData(tTag);
-					navStatusTagged = formatNavStatus(navStatus);
+					epochTimeTagged = formatEpochTime(tTag);
+					satStateTagged = formatSatStateData();
+					navStatusTagged = formatNavStatus();
 				}
 				this.runOnUiThread(new Runnable() {     //display data inmediately
 					@Override
 					public void run() {
 						if (displayEpoch) {
-							dataAcq_satState.setText(epochObsTagged);
+							dataAcq_epoch.setText(epochTimeTagged);
+							dataAcq_satState.setText(satStateTagged);
 							dataAcq_navState.setText(navStatusTagged);
 						}
 						if(storeEpoch) {
@@ -481,7 +491,7 @@ public class PerformDataAcq extends AppCompatActivity {
 			this.runOnUiThread(new Runnable() {     //display data inmediately
 				@Override
 				public void run() {
-					dataAcq_satState.setText(getString(R.string.dataAcq_badClock));
+					dataAcq_epoch.setText(getString(R.string.dataAcq_badClock));
 				}
 			} );
 		}
@@ -602,8 +612,8 @@ public class PerformDataAcq extends AppCompatActivity {
 				storeNavMsg(Constants.MT_SATNAV_BEIDOU_D2, status, 'C', satellite, navMsgSubId, navMsgId, 40, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GAL_I:
-				//only words 1 to 5 have RINEX nav data
-				if ((navMsgSubId > 0) && (navMsgSubId < 6)) {
+				//only words 1 to 6 and 10 have RINEX nav data
+				if (((navMsgSubId > 0) && (navMsgSubId < 7)) || (navMsgSubId == 10)) {
 					storeNavMsg(Constants.MT_SATNAV_GALILEO_INAV, status, 'E', satellite, navMsgSubId, navMsgId, 29, navMsg);
 				}
 				break;
@@ -672,11 +682,10 @@ public class PerformDataAcq extends AppCompatActivity {
 	private boolean createNavStore(String intoDir, String forAcq) {
 		try {
 			File gnssDir = createAppDirStore(intoDir);
-//			gnssNavFile = new File(gnssDir, Constants.NRD_FILE_NAME);
 			gnssNavFile = new File(gnssDir, forAcq + NRD_FILE_EXTENSION);
-			//new FileWriter(gnssNavFile, true);
 			gnssNavOut = new PrintStream(gnssNavFile);
 			storeRxIdMsg(gnssNavOut, NRD_FILE_EXTENSION, NRD_FILE_VERSION, false);
+			timeNavDataStored = false;
 			return true;
 		} catch (IOException e) {
 			String errorMsg = "When createNavStore:" + e;
@@ -685,51 +694,58 @@ public class PerformDataAcq extends AppCompatActivity {
 		}
 	}
 	/**
-	 * formatEpochData converts to tagged HTML text the existing relevant data and satellite status for
-	 * the current epoch. This data will be used for further displaying in a text view.
+	 * formatEpochTime converts to tagged HTML text the existing relevant time data for the current epoch.
+	 * This data will be used for further displaying in a text view.
 	 * @param epochTime the epoch time in nanoseconds, assuming GPS time reference
 	 * @return the tagged HTML text to be displayed
 	 */
-	private Spanned formatEpochData(long epochTime) {
+	private Spanned formatEpochTime(long epochTime) {
+		String epochTimeTxt = "<b>EPOCH"
+				+ String.format(Locale.US, " (%d of %d)", epochCounter, storeEpoch? totalEpochs:0)
+				+ String.format(Locale.US, " week %5d", epochTime / NUMBER_NANOSECONDS_WEEK)
+				+ String.format(Locale.US, " tow %ds.", (epochTime % NUMBER_NANOSECONDS_WEEK)/1000000000);
+		return (Html.fromHtml(epochTimeTxt, Html.FROM_HTML_MODE_COMPACT));
+	}
+	/**
+	 * formatSatStateData converts to tagged HTML text the existing relevant data and satellite status for the current epoch.
+	 * This data will be used for further displaying in a text view.
+	 * @return the tagged HTML text to be displayed
+	 */
+	private Spanned formatSatStateData() {
 		String color;
 		String code;
 		String currentSat;
+		String lineBrk = "";
 		String printedSat = "";
-		String epochObsTxt = "<b>EPOCH"
-				+ String.format(" (%d of %d)", epochCounter, storeEpoch? totalEpochs:0)
-				+ String.format(" week %5d", epochTime / NUMBER_NANOSECONDS_WEEK)
-				+ String.format(" tow %ds.", (epochTime % NUMBER_NANOSECONDS_WEEK)/1000000000)
-				+ "<br>SAT C/N0 &nbsp;Observables</b>";
+		String epochObsTxt = "";
 		for (satRawData svo : epochRawData) {
-			//epochObsTxt += "<br>" + String.format("%c%02d", svo.constellation, svo.satellite);
-			currentSat = String.format("%c%02d", svo.constellation, svo.satellite);
+			currentSat = String.format(Locale.US, "%c%02d", svo.constellation, svo.satellite);
 			if (currentSat.compareTo(printedSat) != 0) {
-				epochObsTxt += "<br>" + currentSat;
+				epochObsTxt += lineBrk + currentSat;
+				lineBrk = "<br>";
 				printedSat = currentSat;
-			} else currentSat += " ";
+			}
 			//put S/N value
-			epochObsTxt += String.format(" %3.1f ", svo.cn0db);
+			epochObsTxt += "&nbsp;" + String.format(Locale.US, "%4.1f", svo.cn0db);
 			//set and tag pseudorange
-			code = String.format(" C%c%c", svo.obsBand, svo.obsAttribute);
+			code = String.format(Locale.US, " C%c%c", svo.obsBand, svo.obsAttribute);
 			color = "red";
 			if ((((svo.synchState & STATE_TOW_DECODED) != 0) && ((svo.synchState & STATE_CODE_LOCK) != 0))
 				|| (((svo.synchState & STATE_GLO_TOD_DECODED) != 0) && (svo.synchState & STATE_CODE_LOCK) != 0)) color = "black";
-			else color = "orange";
 			epochObsTxt += tagTextColor(code, color);
-//			epochObsTxt += tagTextColor(code, svo.trackingState == 0? "red":"black");
 			//set and tag obsBand phase
-			code = String.format(" L%c%c", svo.obsBand, svo.obsAttribute);
+			code = String.format(Locale.US, " L%c%c", svo.obsBand, svo.obsAttribute);
 			color = "red";
 			if ((svo.carrierPhaseState & ADR_STATE_VALID) == 1) color = "black";
 			else if ((svo.carrierPhaseState & ADR_STATE_CYCLE_SLIP) != 0) color = "orange";
 			epochObsTxt += tagTextColor(code, color);
 			//set and tag doppler
-			code = String.format(" D%c%c", svo.obsBand, svo.obsAttribute);
+			code = String.format(Locale.US, " D%c%c", svo.obsBand, svo.obsAttribute);
 			if (svo.psRangeRate == 0.0D) color = "red";
 			else color = "black";
 			epochObsTxt += tagTextColor(code, color);
 			//set and tag S/N
-			code = String.format(" S%c%c", svo.obsBand, svo.obsAttribute);
+			code = String.format(Locale.US, " S%c%c", svo.obsBand, svo.obsAttribute);
 			if (svo.cn0db == 0.0D) color = "red";
 			else color = "black";
 			epochObsTxt += tagTextColor(code, color);
@@ -739,20 +755,12 @@ public class PerformDataAcq extends AppCompatActivity {
 	/**
 	 * storeEpochData stores in the observation raw data file the data acquired during the
 	 * current epoch from all tracked satellites,
-	 * To do that a message type MT_EPOCH is generated containing all clock data for this epoch,
+	 * To do that, a message type MT_EPOCH is generated containing all clock data for this epoch,
 	 * and, for each satellite having measurements in this epoch, a message type MT_OBS is generated.
 	 */
 	private void storeEpochData() {
 		try {
-			gnssObsOut.printf(Locale.US, "%d;%d;%d;%g;%g;%d;%d;%d\n",
-					Constants.MT_EPOCH,
-					epochRawData.get(0).epochTimeNanos,
-					epochRawData.get(0).epochFullBiasNanos,
-					epochRawData.get(0).epochBiasNanos,
-					epochRawData.get(0).epochDriftNanos,
-					epochRawData.get(0).epochClockDiscontinuityCount,
-					epochRawData.get(0).epochLeapSeconds,
-					epochRawData.size());
+			storeTimeEpoch(gnssObsOut);
 			for (satRawData svo : epochRawData) {
 				gnssObsOut.printf(Locale.US, "%d;%c%02d;%c%c",
 						Constants.MT_SATOBS,
@@ -770,34 +778,34 @@ public class PerformDataAcq extends AppCompatActivity {
 		}
 	}
 	/**
-	 * storeRxIdMsg stores in the "storage" raw data file a set of receiver identification messages and
+	 * storeRxIdMsg stores in the given raw data file a set of receiver identification messages and
 	 * other data needed for the RINEX header.
-	 * @param storage the output file where raw data will stored
+	 * @param gnssDataOut the output file where raw data will stored
 	 * @param fileType the output file type: .ORD (Obervation Raw Data) or .NRD (Navigation Raw Data
 	 * @param fileVersion the current version of the output file
 	 * @param storeLLA obtain and store current Latitude, Longitude, Altirude
 	 */
-	private void storeRxIdMsg(PrintStream storage, String fileType, String fileVersion, boolean storeLLA) {
+	private void storeRxIdMsg(PrintStream gnssDataOut, String fileType, String fileVersion, boolean storeLLA) {
         String errorMsg = "storeRxIdMsg error: ";
 		Calendar calendar = Calendar.getInstance();
 		try {
-			storage.printf(Locale.US, "%d;%s;%s\n", Constants.MT_GRDVER, fileType.toUpperCase(), fileVersion);
-			storage.printf(Locale.US, "%d;%s %s\n", Constants.MT_PGM, APP_NAME, APP_VERSION);
-			storage.printf(Locale.US, "%d;%s %s %s\n", Constants.MT_DVTYPE, Build.MANUFACTURER, Build.BRAND, Build.MODEL);
-			storage.printf(Locale.US, "%d;Android %s SDK %s\n", Constants.MT_DVVER, Build.VERSION.RELEASE, Build.VERSION.SDK_INT);
-			storage.printf(Locale.US, "%d;%tY%tm%td %tH%tM%tS LCL\n", Constants.MT_DATE, calendar,calendar,calendar,calendar,calendar,calendar);
-			storage.printf(Locale.US, "%d;%d\n", Constants.MT_INTERVALMS, acquisitionRateMs);
-            storage.printf(Locale.US, "%d;DBHZ\n", Constants.MT_SIGU);
+			gnssDataOut.printf(Locale.US, "%d;%s;%s\n", Constants.MT_GRDVER, fileType.toUpperCase(), fileVersion);
+			gnssDataOut.printf(Locale.US, "%d;%s %s\n", Constants.MT_PGM, APP_NAME, APP_VERSION);
+			gnssDataOut.printf(Locale.US, "%d;%s %s %s\n", Constants.MT_DVTYPE, Build.MANUFACTURER, Build.BRAND, Build.MODEL);
+			gnssDataOut.printf(Locale.US, "%d;Android %s SDK %s\n", Constants.MT_DVVER, Build.VERSION.RELEASE, Build.VERSION.SDK_INT);
+			gnssDataOut.printf(Locale.US, "%d;%tY%tm%td %tH%tM%tS LCL\n", Constants.MT_DATE, calendar,calendar,calendar,calendar,calendar,calendar);
+			gnssDataOut.printf(Locale.US, "%d;%d\n", Constants.MT_INTERVALMS, acquisitionRateMs);
+            gnssDataOut.printf(Locale.US, "%d;DBHZ\n", Constants.MT_SIGU);
             try {
 	            if (storeLLA) {
 					Location mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-					storage.printf(Locale.US, "%d;%g;%g;%g\n", Constants.MT_LLA, mLocation.getLatitude(), mLocation.getLongitude(), mLocation.getAltitude());
+					gnssDataOut.printf(Locale.US, "%d;%g;%g;%g\n", Constants.MT_LLA, mLocation.getLatitude(), mLocation.getLongitude(), mLocation.getAltitude());
 				}
 			} catch (NullPointerException e) {
 				errorMsg += e;
 				dataAcq_log.setText(errorMsg);
 			}
-			if (storage.checkError()) {
+			if (gnssDataOut.checkError()) {
 				errorMsg += "writing header data";
 				dataAcq_log.setText(errorMsg);
 			}
@@ -819,9 +827,17 @@ public class PerformDataAcq extends AppCompatActivity {
 	 */
 	private void storeNavMsg(int msgType, int stat, char cnsID, int sat, int navMsgSubId, int navMsgId, int msgSize, byte[] msg) {
 		try {
+			if (!(epochRawData.isEmpty() || timeNavDataStored)) {
+				storeTimeEpoch(gnssNavOut);
+				timeNavDataStored = true;
+			}
 			gnssNavOut.printf(Locale.US, "%d;%d;%c%02d;%d;%d;%d", msgType, stat, cnsID, sat, navMsgSubId, navMsgId, msgSize);
 			for (int i = 0; i < msgSize; i++) gnssNavOut.printf(Locale.US, ";%02X", msg[i]);
 			gnssNavOut.printf(Locale.US, "\n");
+			if (navMsgConstellations.indexOf(cnsID) == -1) {
+				navMsgConstellations += " " + Character.toString(cnsID);
+				navMsgFrom =  " " + getString(R.string.dataAcq_navStatus_READYfrom);
+			}
 		} catch (IllegalFormatException e) {
 			String errorMsg = "storeNavMsg error:" + e;
 			dataAcq_log.setText(errorMsg);
@@ -832,11 +848,11 @@ public class PerformDataAcq extends AppCompatActivity {
 	 * acquired to be used to display it.
 	 * @return the HTML text with the status
 	 */
-	private Spanned formatNavStatus(int navigationStatus) {
+	private Spanned formatNavStatus() {
 		String navStatusTxt;
-		switch (navigationStatus) {
+		switch (navStatus) {
 			case GnssNavigationMessage.Callback.STATUS_READY:
-				navStatusTxt = tagTextColor(getString(R.string.dataAcq_navStatus_READY),"black");
+				navStatusTxt = tagTextColor(getString(R.string.dataAcq_navStatus_READY) + navMsgFrom + navMsgConstellations,"black");
 				break;
 			case GnssNavigationMessage.Callback.STATUS_LOCATION_DISABLED:
 				navStatusTxt = tagTextColor(getString(R.string.dataAcq_navStatus_DISABLED),"orange");
@@ -864,5 +880,20 @@ public class PerformDataAcq extends AppCompatActivity {
 			if ((++count % 3) == 0)  dataAcq_pointFiles.append("\n");
 			else dataAcq_pointFiles.append("  ");
 		}
+	}
+	/**
+	 * storeTimeEpoch print into the given raw data PrintStream the current epoch time data (MT_EPOCH message)
+	 * @param gnssDataOut the print stream where data will be printed
+	 */
+	private void storeTimeEpoch(PrintStream gnssDataOut) {
+		gnssDataOut.printf(Locale.US, "%d;%d;%d;%g;%g;%d;%d;%d\n",
+				Constants.MT_EPOCH,
+				epochRawData.get(0).epochTimeNanos,
+				epochRawData.get(0).epochFullBiasNanos,
+				epochRawData.get(0).epochBiasNanos,
+				epochRawData.get(0).epochDriftNanos,
+				epochRawData.get(0).epochClockDiscontinuityCount,
+				epochRawData.get(0).epochLeapSeconds,
+				epochRawData.size());
 	}
 }
