@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">to RINEX Pro</string>
-    <string name="enable_field">true</string>
+    <string name="app_name">to RINEX</string>
+    <string name="enable_allFuntions">true</string>
     <string name="app_reqAPIlevel">This application requires Android 7.1 or higher</string>
     <string name="app_perm_OK">Permissions GRANTED</string>
     <string name="app_perm_NOK">Permissions NOT granted. Cannot continue</string>
@@ -42,11 +42,15 @@
     <string name="dataAcq_logMsgs">"Log messages"</string>
     <string name="dataAcq_acqAborted">Acquisition ABORTED for this point</string>
     <string name="dataAcq_navStatus_UNKNOWN">Navigation data status is UNKOWN</string>
-    <string name="dataAcq_navStatus_READY">Receiving navigation data</string>
-    <string name="dataAcq_navStatus_READYfrom">from:</string>
-    <string name="dataAcq_navStatus_DISABLED">Reception of navigation data is disabled</string>
-    <string name="dataAcq_navStatus_NOT_SUPPORTED">This device is unable to provide navigation data</string>
+    <string name="dataAcq_navStatus_READY">NavMsg@sats</string>
+    <string name="dataAcq_navStatus_READYfrom">:</string>
+    <string name="dataAcq_navStatus_DISABLED">Acquisition of navigation data is disabled</string>
+    <string name="dataAcq_navStatus_NOT_SUPPORTED">Device unable to provide navigation data</string>
     <string name="dataAcq_badClock">Receiver clock does not change from epoch to epoch</string>
+    <string name="dataAcq_rawFileOpen">Error when creating raw data file</string>
+    <string name="dataAcq_rawDataWrite">Error when storing raw data</string>
+    <string name="dataAcq_rawObs"> (Observation):</string>
+    <string name="dataAcq_rawNav"> (Navigation):</string>
 
     <!-- RINEX headers settings -->
     <string name="pref_header_setupRINEX">Setup RINEX headers</string>
@@ -57,11 +61,11 @@
     <string name="pref_title_rinex_categoryothers">Others</string>
     <string-array name="pref_rinex_version">
         <item>2.10</item>
-        <item>3.02</item>
+        <item>3.04</item>
     </string-array>
     <string-array name="pref_rinex_version_values">
         <item>2.10</item>
-        <item>3.02</item>
+        <item>3.04</item>
     </string-array>
     <string name="pref_default_rinex_version">2.10</string>
     <string name="pref_title_rinex_runby">RUN BY header field</string>
@@ -149,7 +153,7 @@
     </string-array>
     <string-array name="pref_default_rinex_observables">
     </string-array>
-    <string name="pref_title_rinex_country">ISO country code (for RINEX V3.02 file names)</string>
+    <string name="pref_title_rinex_country">ISO country code (for RINEX V3 file names)</string>
     <string name="pref_title_rinex_loglevel">Logging level when generating RINEX files</string>
     <string-array name="pref_rinex_loglevel">
         <item>INFO</item>
@@ -198,18 +202,18 @@
         &lt;br>&lt;p>The application  stores the raw data and RINEX files in the public &lt;em>Documents&lt;/em> directory.&lt;/p>
         &lt;br>&lt;p>For a correct functioning, the user has to give permissions to the application to access the &lt;em>Positioning service&lt;/em> and the &lt;em>Documents&lt;/em> directory.&lt;&lt;/p>
         &lt;br>&lt;p>&lt;font color="red">CREDITS&lt;/font>&lt;/p>
-        &lt;p>toRINEX LITE V2.0, June 2019&lt;/p>
+        &lt;p>toRINEX V3.0, July 2020&lt;/p>
         &lt;p>This application has been developed using Android Studio 3.0.1 and tested in Nexus 5X with Android 7.1.2 and Xiaomi Mi 8 with Android 9&lt;/p>
         &lt;br>&lt;p>Contact: gnss.apps@gmail.com &lt;/p>
     </string>
     <string name="setup_acquisition_info_title">Information on setup for acquisition</string>
     <string name="setup_acquisition_info_body">&lt;p>Each acquisition of GNSS raw data is performed with the receiver/phone placed in a fixed point.&lt;/p>
-        &lt;p>All raw collected in a given point will be stored in an Observation Raw Data file (ORD extension)&lt;/p>
+        &lt;p>All raw data collected in a given point will be stored in an Observation Raw Data file (ORD extension)&lt;/p>
         &lt;br>&lt;p>A Survey is a set of files containing measurements from several points. The survey name is used to create a directory where all files related to this survey will be placed.&lt;/p>
         &lt;p>The proposed survey names have the format&lt;/p>
         &lt;p>SYearMonthDay_Hour_Minute&lt;/p>
         &lt;p>Each file having data for a point has the name format PHour_Minute_Second&lt;/p>
-        &lt;p>Time values are from the current local time.&lt;/p>
+        &lt;p>Time values are from the current UTC time.&lt;/p>
         &lt;br>&lt;p>Observation raw data in each ORD file are grouped by epochs, each one containing the set of measurements taken by the receiver in this epoch from all satellites in view.&lt;/p>
         &lt;p>The user has to select the number of epochs to be collected for each point, and the epochs interval in seconds.&lt;/p>
         &lt;br>&lt;p>Some devices are able to provide data transmitted inside satellites navigation messages. The user can select if such data would be acquired or not.&lt;/p>

@@ -9,11 +9,10 @@ public class Constants {
     //to identify this application and its products
     public static final String APP_NAME = "toRINEX"; //application name for APP internal use (naming directories)
     public static final String APP_VERSION = "1"; //current application version code
-    public static final String ORD_FILE_VERSION = "1";   //current GNSS Observation Raw Data file version code
+    public static final String ORD_FILE_VERSION = "2";   //current GNSS Observation Raw Data file version code
     public static final String ORD_FILE_EXTENSION = ".ORD"; //GNSS Observation Raw Data file extension code
-    public static final String NRD_FILE_VERSION = "1";   //current GNSS Navigation Raw Data file version
+    public static final String NRD_FILE_VERSION = "2";   //current GNSS Navigation Raw Data file version
     public static final String NRD_FILE_EXTENSION = ".NRD"; //GNSS Navigation Raw Data file extension
-    public static final String NRD_FILE_NAME = "NAVRAWDATA.NRD";
     //to manage the permissions needed in the app
     public static final int ACQ_REQUEST_ID = 1;
     public static final String[] REQUIRED_PERMISSIONS = {
@@ -23,25 +22,7 @@ public class Constants {
     //to manage acquisition of GNSS data
     public static final long NUMBER_NANOSECONDS_DAY = 24L * 60L * 60L * 1000000000L;
     public static final long NUMBER_NANOSECONDS_WEEK = 7L * NUMBER_NANOSECONDS_DAY;
-    public static final double CARRIER_FREQUENCY_DEFAULT = 1575.45;   //L1 frequency in MHz
-    public static final double BAND1_LOWER_FREQ = 1559.0;   //RINEX band 1 lower frequency in MHz
-    public static final double BAND1_UPPER_FREQ = 1610.0;   //RINEX band 1 upper frequency in MHz
-    public static final double BAND2_LOWER_FREQ = 1215.0;   //RINEX band 2 lower frequency in MHz
-    public static final double BAND2_UPPER_FREQ = 1254.0;   //RINEX band 2 upper frequency in MHz
-    public static final double BAND5_LOWER_FREQ = 1164.0;   //RINEX band 5 lower frequency in MHz
-    public static final double BAND5_UPPER_FREQ = 1189.0;   //RINEX band 5 upper frequency in MHz
-    public static final double BAND6_LOWER_FREQ = 1260.0;   //RINEX band 6 lower frequency in MHz
-    public static final double BAND6_UPPER_FREQ = 1300.0;   //RINEX band 6 upper frequency in MHz
-    public static final double BAND7_LOWER_FREQ = 1189.0;   //RINEX band 7 lower frequency in MHz
-    public static final double BAND7_UPPER_FREQ = 1214.0;   //RINEX band 7 upper frequency in MHz
-    public static final double BAND8_LOWER_FREQ = 1188.0;   //RINEX band 8 is GAL E5a+b (band 5 + band 7)
-    public static final double BAND8_UPPER_FREQ = 1190.0;   //with central frequency at 1189
-    //tracking states allowing unambiguous pseudorange computation when ReceivedSvTimeNanos was taken
-    public static final int TRACKING_ST_AMBIGUOUS = 0;   //When: STATE_TOW_DECODED or _KNOWN or STATE_GLO_TOD_DECODED
-    public static final int TRACKING_ST_TOW_TOD = 1;   //When: STATE_TOW_DECODED or _KNOWN or STATE_GLO_TOD_DECODED
-    public static final int TRACKING_ST_SUBF_PAGE = 2;  //When: STATE_SUBFRAME_SYNC or STATE_GLO_STRING_SYNC or STATE_GAL_E1B_PAGE_SYNC
-    public static final int TRACKING_ST_2NDCODE = 4;   //When: STATE_E1C_2ND_CODE_LOCK
-    public static final int TRACKING_ST_WHOLE = 8;   //When: STATE_E1C_2ND_CODE_LOCK
+    public static final double CARRIER_FREQUENCY_DEFAULT = 1575.42;   //L1 frequency in MHz
     //an estimate of the maximum visible sats and measurements
     public static final int MAX_SATELLITES = 60;
     public static final int MAX_MEASUREMENTS = MAX_SATELLITES * 4;
@@ -50,16 +31,20 @@ public class Constants {
     //The type of messages that GNSS Raw Data files or setup arguments can contain
     public static final int MT_EPOCH = 1;    //Epoch data
     public static final int MT_SATOBS = 2;   //Satellite observations data
-    public static final int MT_SATNAV_GPS_L1_CA = 10;   //Satellite navigation data from GPS L1 C/A
-    public static final int MT_SATNAV_GLONASS_L1_CA = 11;   //Satellite navigation data from GLONASS L1 C/A
-    public static final int MT_SATNAV_GALILEO_INAV = 12;   //Satellite navigation data from Galileo I/NAV
-    public static final int MT_SATNAV_GALILEO_FNAV = 13;   //Satellite navigation data from Galileo F/NAV
-    public static final int MT_SATNAV_BEIDOU_D1 = 14;   //Satellite navigation data from Beidou D1
-    public static final int MT_SATNAV_GPS_L5_C = 15;   //Satellite navigation data from GPS L5 C
-    public static final int MT_SATNAV_GPS_C2 = 16;   //Satellite navigation data from GPS C2
-    public static final int MT_SATNAV_GPS_L2_C = 17;   //Satellite navigation data from GPS L2 C
-    public static final int MT_SATNAV_BEIDOU_D2 = 18;   //Satellite navigation data from Beidou D1
-    public static final int MT_SATNAV_UNKNOWN = 40;   //Satellite navigation data unknown type
+    public static final int MT_SATNAV_OFFSET = 2;   //an offset to convert MT_SATNAVs into indexes
+            //all MT_SATNAV values shall be between MT_SATNAV_OFFSET and MT_SATNAV_UNKNOWN
+                                         //number 2 is empty. For future assignment
+    public static final int MT_SATNAV_GPS_L1_CA = 3;   //Satellite navigation data from GPS L1 C/A
+    public static final int MT_SATNAV_GLONASS_L1_CA = 4;   //Satellite navigation data from GLONASS L1 C/A
+    public static final int MT_SATNAV_GALILEO_INAV = 5;   //Satellite navigation data from Galileo I/NAV
+    public static final int MT_SATNAV_GALILEO_FNAV = 6;   //Satellite navigation data from Galileo F/NAV
+    public static final int MT_SATNAV_BEIDOU_D1 = 7;   //Satellite navigation data from Beidou D1
+    public static final int MT_SATNAV_GPS_L5_C = 8;   //Satellite navigation data from GPS L5 C
+    public static final int MT_SATNAV_GPS_C2 = 9;   //Satellite navigation data from GPS C2
+    public static final int MT_SATNAV_GPS_L2_C = 10;   //Satellite navigation data from GPS L2 C
+    public static final int MT_SATNAV_BEIDOU_D2 = 11;   //Satellite navigation data from Beidou D2
+                                        //numbers 12 to 14 are empty
+    public static final int MT_SATNAV_UNKNOWN = 15;   //Satellite navigation data unknown type
     public static final int MT_GRDVER = 50;    //Observation or navigation raw data files version
     public static final int MT_PGM = 51;       //Program used to generate data (toRINEX Vx.x)
     public static final int MT_DVTYPE = 52;   //Device type
@@ -85,6 +70,9 @@ public class Constants {
     public static final int MT_SATELLITES = 98;
     public static final int MT_OBSERVABLES = 99;
     //other useful constants
+    public static final int MAX_SATNAV_MSG = MT_SATNAV_UNKNOWN - MT_SATNAV_OFFSET;    //number of different messages (from MT_SATNAV_GPS_L1_CA to MT_SATNAV_UNKNOWN)
+    public static final int MAX_SATNAV = 38;    //maximum number for satellite identification for any constellation (GPS: 32; GLO: 38; GAL: 36; BDS: 32)
+    public static final int MAX_SATNAV_LIMSAT = 4;  //maximum number of satellite identification to be considered when a limit is stated
     public static final String EMPTY = "";
     public static final String SEMICOLON = ";";
     public static final int RINEX_SINGLE = 0;

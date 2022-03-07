@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/toRINEX.iml" filepath="$PROJECT_DIR$/toRINEX.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/toRINEX.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/toRINEX.app.iml" />
     </modules>
   </component>
 </project>

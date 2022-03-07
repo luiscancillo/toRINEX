@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static android.location.GnssMeasurement.ADR_STATE_CYCLE_SLIP;
@@ -69,7 +70,6 @@ import static com.gnssapps.acq.torinex.Constants.*;
 
 public class PerformDataAcq extends AppCompatActivity {
 	//to manage views and their contents
-	private ActionBar appBar;
 	private TextView dataAcq_epoch;
 	private TextView dataAcq_satState;
 	private TextView dataAcq_navState;
@@ -78,16 +78,13 @@ public class PerformDataAcq extends AppCompatActivity {
 	private ToggleButton dataAcq_startStop;
 	private ProgressBar dataAcq_progress;
 	private TextView dataAcq_pointFiles;
-	private TextView dataAcq_log;
 	private String survey;
-	private SharedPreferences sharedPref;
 	//to manage acquisition of GNSS data
 	private LocationManager mLocationManager;
 	//to store acquired observation raw data
 	private File gnssObsFile;
 	private PrintStream gnssObsOut;
-	//a place to save satellite raw data before being stored in the file
-//	private class satRawData {
+	//a place to save satellite raw data before store them in the file
 	private class satRawData implements Comparable<satRawData> {
 		long timeTag;
 		int order;
@@ -104,7 +101,6 @@ public class PerformDataAcq extends AppCompatActivity {
 		int epochClockDiscontinuityCount;
 		int epochLeapSeconds;
 		//GNSS measurement related
-//		int trackingState;
 		int synchState;
 		long receivedSatTimeNanos;
 		double timeOffsetNanos;
@@ -115,13 +111,11 @@ public class PerformDataAcq extends AppCompatActivity {
 		double psRangeRate;
 		double psRangeRateUncert;
 		long receivedSvTimeUncert;
-		//boolean ambiguous;
 		//constructor for objects
 		public satRawData(
 				long tTag,
 				int cns, int satId, char band, char attr,
 				long clkTimeNanos, long clkFullBiasNanos, double clkBiasNanos, double clkDriftNanos, int clkDiscotyCount, int clkLeapSec,
-//				int trkSt, long rcvSatTn, double timeOffsetNanos,
 				int syncSt, long rcvSatTn, double timeOffsetNanos,
 				int adrSt, double adrMeters, double carrFq,
 				double cn0db,
@@ -148,7 +142,6 @@ public class PerformDataAcq extends AppCompatActivity {
 			this.epochDriftNanos = clkDriftNanos;
 			this.epochClockDiscontinuityCount = clkDiscotyCount;
 			this.epochLeapSeconds = clkLeapSec;
-//			this.trackingState = trkSt;
 			this.synchState = syncSt;
 			this.receivedSatTimeNanos = rcvSatTn;
             this.carrierPhaseState = adrSt;
@@ -169,23 +162,30 @@ public class PerformDataAcq extends AppCompatActivity {
 			return 0;
 		}
 	}
+	//data to process epochs
 	private int epochCounter;   //the order number of the last epoch acquired
-	private int totalEpochs;    //the number of epochs to be acquired
+	private int totalEpochs;    //the number of total epochs to acquire
 	private boolean storeEpoch; //if epoch data will be stored in a file or not
-	private boolean displayEpoch;   //if epoch data will be displayed or not
-	private ArrayList <satRawData> epochRawData = new ArrayList<satRawData>();
+	private ArrayList<satRawData> epochRawData = new ArrayList<satRawData>();
 	private Spanned epochTimeTagged; //a place to format epoch time data to be displayed
+
 	private Spanned satStateTagged; //a place to format satellite observation state (to be displayed) during a epoch
 	private long acquisitionRateMs; //the rate to acquire epoch data
 	//to save and store acquired navigation data
 	private int navStatus;      //the navigation data acquisition status
-	private String navMsgConstellations;	//the constellations for which receiver is providing navigation message
+	private String navMsgConstellations;	//the constellations from which receiver is providing navigation message
 	private String navMsgFrom;
 	private Spanned navStatusTagged; //a place to format the navigation data acquisition status
+	private long navGloAlmanac;		// a bit pattern to flag the frame-strings of the GLONASS almanac received
 	private boolean acquireNavData; //if true navigation data would be acquired (if available) and stored
-	private boolean timeNavDataStored;	//if true the time of the first epoch acquired has been stored in the nav file
-	private File gnssNavFile;
-	private PrintStream gnssNavOut;
+	private boolean timeNavDataStored;	//if true the time of the first epoch acquired has been already stored in the nav file
+	private File gnssNavFile;		//the file to print the navigation messages
+	private PrintStream gnssNavOut;	//the related stream
+	private int[][] satsWithNavMsg = new int[MAX_SATNAV_MSG][MAX_SATNAV]; //a row for each message type where it is
+																		//placed the list of satellites who sent it
+	private int[] totalSatsWithNavMsg = new int[MAX_SATNAV_MSG];	//counters for each message type with the total number
+																	// of different satellites which have sent it
+	private boolean limitNavMsgTo4;	//if true, it is limited the number of navigation messages to store
 
 	private final LocationListener mLocationListener =
 			new LocationListener() {
@@ -238,6 +238,8 @@ public class PerformDataAcq extends AppCompatActivity {
 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		ActionBar appBar;
+		SharedPreferences sharedPref;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_perform_data_acq);
 		//modify action bar title
@@ -267,7 +269,7 @@ public class PerformDataAcq extends AppCompatActivity {
 						dataAcq_point.setText(fileName);
 						dataAcq_progress.setMax(totalEpochs);
 					} else {
-					 //TODO : action when the file cannot be created
+						Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawFileOpen) + getString(R.string.dataAcq_rawObs) , Toast.LENGTH_SHORT).show();
 					}
 				}
 				else {
@@ -283,12 +285,8 @@ public class PerformDataAcq extends AppCompatActivity {
 		});
 		dataAcq_pointFiles = (TextView) findViewById(R.id.perf_dataAcq_points);
 		dataAcq_pointFiles.setMovementMethod(new ScrollingMovementMethod());
-		dataAcq_log = (TextView) findViewById(R.id.perf_dataAcq_log);
-		dataAcq_log.setMovementMethod(new ScrollingMovementMethod());
-		//Get a LocationManager
 		navStatus = GnssNavigationMessage.Callback.STATUS_NOT_SUPPORTED;    //default value
-		navMsgConstellations = "";
-		navMsgFrom = "";
+		//Get a LocationManager
 		mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 		mLocationManager.registerGnssMeasurementsCallback(gnssMeasurementsEventListener);
 		mLocationManager.registerGnssNavigationMessageCallback(gnssNavigationMessageListener);
@@ -301,7 +299,6 @@ public class PerformDataAcq extends AppCompatActivity {
 			totalEpochs = 0;
 		}
 		storeEpoch = false;
-		displayEpoch = true;
 		try {
 			acquisitionRateMs = TimeUnit.SECONDS.toMillis(
 					Long.parseLong(sharedPref.getString(
@@ -316,6 +313,12 @@ public class PerformDataAcq extends AppCompatActivity {
 			String fileName = String.format(Locale.US, "N%tH_%tM_%tS",calendar, calendar, calendar);
 			acquireNavData = createNavStore(survey, fileName);
 		}
+		limitNavMsgTo4 = getString(R.string.enable_allFuntions).equalsIgnoreCase("true");
+		satsWithNavMsg = new int[MAX_SATNAV_MSG][MAX_SATNAV];
+		navMsgConstellations = "";
+		navMsgFrom = "";
+		for (int i = 0; i < MAX_SATNAV_MSG; i++) totalSatsWithNavMsg[i] = 0;
+		navGloAlmanac = 0x0003_FFFF_FFFF_FFFFL;	//50 bits set to 1
 	}
 	@Override
 	public void onStart() {
@@ -409,10 +412,11 @@ public class PerformDataAcq extends AppCompatActivity {
 	 * saveGnssObservables acquires satellite observables data from GNSS receiver measurements.
 	 * Acquisition is performed grouping satellite observables by epochs: all observables belonging
 	 * to the same epoch are saved in the global array variable epochRawData.
-	 * When a measurement belonging to the next epoch appears, if requested, current contents of epochRawData
-	 * are stored in a file and status displayed (depending on values of global variables storeEpoch
-	 * and displayEpoch). Then current contents of epochRawData are cleared.
+	 * When a measurement appears belonging to a new epoch, current contents of epochRawData
+	 * would be stored (depending on value of storeEpoch) in a file, acquired observables displayed,
+	 * and current epoch data cleared.
 	 * The new raw data are added to epochRawData.
+	 *
 	 *
 	 * @param clock the GnssClock data the measurement data
 	 * @param measurement the GnssMeasurement data adquired from GNSS receiver
@@ -431,19 +435,17 @@ public class PerformDataAcq extends AppCompatActivity {
 				Collections.sort(epochRawData);
 				epochCounter++;
 				if (storeEpoch && (epochCounter <= totalEpochs))  storeEpochData();
-				if (displayEpoch) {
-					epochTimeTagged = formatEpochTime(tTag);
-					satStateTagged = formatSatStateData();
-					navStatusTagged = formatNavStatus();
-				}
-				this.runOnUiThread(new Runnable() {     //display data inmediately
+				//update data to be displayed
+				epochTimeTagged = formatEpochTime(tTag);
+				satStateTagged = formatSatStateData();
+				navStatusTagged = formatNavStatus();
+				//display data immediately
+				this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (displayEpoch) {
-							dataAcq_epoch.setText(epochTimeTagged);
-							dataAcq_satState.setText(satStateTagged);
-							dataAcq_navState.setText(navStatusTagged);
-						}
+						dataAcq_epoch.setText(epochTimeTagged);
+						dataAcq_satState.setText(satStateTagged);
+						dataAcq_navState.setText(navStatusTagged);
 						if(storeEpoch) {
 							if (epochCounter > totalEpochs) {
 								dataAcq_startStop.setChecked(false);
@@ -466,9 +468,8 @@ public class PerformDataAcq extends AppCompatActivity {
 			else carrFqMHz = CARRIER_FREQUENCY_DEFAULT;
 			int syncState = measurement.getState();
 			int cnsType = measurement.getConstellationType();
-			char band = getBandId(carrFqMHz);
+			char band = getBandId(cnsType, carrFqMHz);
 			char attr = getAttributeId(cnsType, band, syncState);
-//			int trackingLevel = getTrackingLevel(cnsType, band, syncState);
 			int phaseLevel = measurement.getAccumulatedDeltaRangeState();
 			if ((phaseLevel & ADR_STATE_VALID) == 0) phaseLevel = 0;
 			epochRawData.add( new satRawData(
@@ -479,7 +480,6 @@ public class PerformDataAcq extends AppCompatActivity {
 					clock.hasDriftNanosPerSecond()? clock.getDriftNanosPerSecond():0.0D,
 					clock.getHardwareClockDiscontinuityCount(),
 					clock.hasLeapSecond()? clock.getLeapSecond():0,
-//					trackingLevel, measurement.getReceivedSvTimeNanos(),
 					syncState, measurement.getReceivedSvTimeNanos(),
 					measurement.getTimeOffsetNanos(),
                     phaseLevel, measurement.getAccumulatedDeltaRangeMeters(), carrFqMHz,
@@ -488,6 +488,8 @@ public class PerformDataAcq extends AppCompatActivity {
 					measurement.getPseudorangeRateUncertaintyMetersPerSecond(),
 					measurement.getReceivedSvTimeUncertaintyNanos()));
 		} else {
+			//a lot of measurements have been acquired belonging to the same epoch.
+			//may be the receiver is unable to compute the GPST time
 			this.runOnUiThread(new Runnable() {     //display data inmediately
 				@Override
 				public void run() {
@@ -502,13 +504,13 @@ public class PerformDataAcq extends AppCompatActivity {
 	 * Values provided are based on reasonable assumptions.
 	 * Android version 10 provides this value
 	 *
-	 * @param  cns is the constellation identifier
+	 * @param  cnsType is the constellation identifier
 	 * @param band is the band identifier
 	 * @param state is the getReceivedSvTimeNanos state
 	 * @return the RINEX band identifier
 	 */
-	private char getAttributeId (int cns, char band, int state) {
-		switch (cns) {
+	private char getAttributeId (int cnsType, char band, int state) {
+		switch (cnsType) {
 			case CONSTELLATION_GPS:
 				switch (band) {
 					case '1': return 'C'; //it is assumed that L1 C/A is being tracked
@@ -523,8 +525,7 @@ public class PerformDataAcq extends AppCompatActivity {
 						else if ((state & STATE_GAL_E1C_2ND_CODE_LOCK) != 0) return 'C';
 						else if ((state & STATE_GAL_E1B_PAGE_SYNC) == 0) return 'B';
 						break;
-					case '5':
-						return 'X'; //it is assumed that I+Q signals are being tracked
+					case '5': return 'X'; //it is assumed that I+Q signals are being tracked
 					default:
 						break;
 				}
@@ -555,19 +556,50 @@ public class PerformDataAcq extends AppCompatActivity {
 		return '?';
 	}
 	/**
-	 * getBandId determines the RINEX band identification for a given carrier frequency
+	 * getBandId determines the RINEX band identification for a given constellation and carrier frequency
 	 *
+	 * @param  cnsType the constellation type
 	 * @param  carrFreq the measurement signal frequency in MHz
 	 * @return the RINEX band identifier
 	 */
-	private char getBandId(double carrFreq) {
-		if ((carrFreq > BAND1_LOWER_FREQ) && (carrFreq < BAND1_UPPER_FREQ)) return  '1';
-		else if ((carrFreq > BAND2_LOWER_FREQ) && (carrFreq < BAND2_UPPER_FREQ)) return  '2';
-		else if ((carrFreq > BAND5_LOWER_FREQ) && (carrFreq < BAND5_UPPER_FREQ)) return  '5';
-		else if ((carrFreq > BAND6_LOWER_FREQ) && (carrFreq < BAND6_UPPER_FREQ)) return  '6';
-		else if ((carrFreq > BAND7_LOWER_FREQ) && (carrFreq < BAND7_UPPER_FREQ)) return  '7';
-		else if ((carrFreq > BAND8_LOWER_FREQ) && (carrFreq < BAND8_UPPER_FREQ)) return  '8';
-		return  '?';
+	private char getBandId(int cnsType, double carrFreq) {
+		int cf = (int) carrFreq;
+		switch (cnsType) {
+			case CONSTELLATION_GPS:
+				switch (cf) {
+					case 1575: return '1';
+					case 1227: return '2';
+					case 1176: return '5';
+					default: return '?';
+				}
+			case CONSTELLATION_GLONASS:
+				if ((cf >= 1598) && (cf <= 1610)) return '1';
+				if ((cf >= 1242) && (cf <= 1252)) return '2';
+				return '?';
+			case CONSTELLATION_GALILEO:
+				switch (cf) {
+					case 1575: return '1';
+					case 1176: return '5';
+					case 1207: return '7';
+					case 1191: return '8';
+					default: return '?';
+				}
+			case CONSTELLATION_BEIDOU:
+				switch (cf) {
+					case 1575: return '1';
+					case 1561: return '2';
+					default: return '?';
+				}
+			case CONSTELLATION_SBAS:
+			case CONSTELLATION_QZSS:
+				switch (cf) {
+					case 1575: return '1';
+					case 1176: return '5';
+					default: return '?';
+				}
+			default:
+				return '?';
+		}
 	}
 	/**
 	 * saveGnssNavMessage gets from the navigation message in the event passed relevant data for further
@@ -577,6 +609,7 @@ public class PerformDataAcq extends AppCompatActivity {
 	 */
 	private void saveGnssNavMessage(GnssNavigationMessage event) {
 		//get status, satellite and navigation message data
+		long gloAlmanacMask;
 		int status = event.getStatus();
 		int navMsgType = event.getType();
 		int satellite = event.getSvid();
@@ -622,8 +655,24 @@ public class PerformDataAcq extends AppCompatActivity {
 				storeNavMsg(Constants.MT_SATNAV_GALILEO_FNAV, status, 'E', satellite, navMsgSubId, navMsgId, 30, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_GLO_L1CA:
-				//only strings 1 to 5 have RINEX data,
-				// but almanac strings (6 to 15) are needed to build the OSN (Orbital Slot Number) - FCN (Frequency Channel Number) table
+				//only strings 1 to 5 (navMsgSubId)  in frames 1 to 5 (navMsgId) have aphemeris plus corrections,
+				if ((navMsgId < 1) || (navMsgId > 5)) return;	//ignore unknown frames
+				//but almanac strings 6 to 15 in frames 1 to 5 are needed to build the OSN (Orbital Slot Number) - FCN (Frequency Channel Number) table
+				//note that the same almanac string are transmited across all satellites and it is needed only once
+				//The logic is:
+				// - the bit pattern gloAlmReceived has a bit for each frame-string (50 bits). They are initially set to 1
+				// - when a given frame-string is stored, the correspondig bit is reset
+				// - do not store any frame-string already stored
+				// - when gloAlmReceived is 0 it means that all string in the almanac have been already stored
+				if ((navMsgSubId >= 6) && (navMsgSubId <= 15)) {
+					//It is an almanac string. If the full almanac has been alredy stored, do not continue
+					if (navGloAlmanac == 0L) return;
+					//check if this frame-string has been already stored. If true, do not continue
+					gloAlmanacMask = 0x1L << (10 * (navMsgId - 1) + (navMsgSubId - 6));
+					if ((navGloAlmanac & gloAlmanacMask) == 0) return;
+					//Reset the bit corresponding to this almanac frame-string to be stored
+					navGloAlmanac = navGloAlmanac & (~gloAlmanacMask);
+				}
 				storeNavMsg(Constants.MT_SATNAV_GLONASS_L1_CA, status, 'R', satellite, navMsgSubId, navMsgId, 11, navMsg);
 				break;
 			case GnssNavigationMessage.TYPE_UNKNOWN:
@@ -664,8 +713,7 @@ public class PerformDataAcq extends AppCompatActivity {
 			storeRxIdMsg(gnssObsOut, ORD_FILE_EXTENSION, ORD_FILE_VERSION, true);
 			return true;
 		} catch (IOException e) {
-			String errorMsg = "When createObsStore:" + e;
-			dataAcq_log.setText(errorMsg);
+			Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawFileOpen) + getString(R.string.dataAcq_rawObs) + e, Toast.LENGTH_LONG).show();
 			return false;
 		}
 	}
@@ -688,8 +736,7 @@ public class PerformDataAcq extends AppCompatActivity {
 			timeNavDataStored = false;
 			return true;
 		} catch (IOException e) {
-			String errorMsg = "When createNavStore:" + e;
-			dataAcq_log.setText(errorMsg);
+			Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawFileOpen) + getString(R.string.dataAcq_rawNav) + e, Toast.LENGTH_LONG).show();
 			return false;
 		}
 	}
@@ -773,8 +820,7 @@ public class PerformDataAcq extends AppCompatActivity {
 						svo.receivedSvTimeUncert);
 			}
 		} catch (IllegalFormatException e) {
-			String errorMsg = "When fmt storeEpochData:" + e;
-			dataAcq_log.setText(errorMsg);
+			Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawDataWrite) + getString(R.string.dataAcq_rawObs) + e, Toast.LENGTH_LONG).show();
 		}
 	}
 	/**
@@ -786,14 +832,14 @@ public class PerformDataAcq extends AppCompatActivity {
 	 * @param storeLLA obtain and store current Latitude, Longitude, Altirude
 	 */
 	private void storeRxIdMsg(PrintStream gnssDataOut, String fileType, String fileVersion, boolean storeLLA) {
-        String errorMsg = "storeRxIdMsg error: ";
-		Calendar calendar = Calendar.getInstance();
+        String errorOn =  "(" + fileType + "):";
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		try {
 			gnssDataOut.printf(Locale.US, "%d;%s;%s\n", Constants.MT_GRDVER, fileType.toUpperCase(), fileVersion);
 			gnssDataOut.printf(Locale.US, "%d;%s %s\n", Constants.MT_PGM, APP_NAME, APP_VERSION);
 			gnssDataOut.printf(Locale.US, "%d;%s %s %s\n", Constants.MT_DVTYPE, Build.MANUFACTURER, Build.BRAND, Build.MODEL);
 			gnssDataOut.printf(Locale.US, "%d;Android %s SDK %s\n", Constants.MT_DVVER, Build.VERSION.RELEASE, Build.VERSION.SDK_INT);
-			gnssDataOut.printf(Locale.US, "%d;%tY%tm%td %tH%tM%tS LCL\n", Constants.MT_DATE, calendar,calendar,calendar,calendar,calendar,calendar);
+			gnssDataOut.printf(Locale.US, "%d;%tY%tm%td %tH%tM%tS UTC\n", Constants.MT_DATE, calendar,calendar,calendar,calendar,calendar,calendar);
 			gnssDataOut.printf(Locale.US, "%d;%d\n", Constants.MT_INTERVALMS, acquisitionRateMs);
             gnssDataOut.printf(Locale.US, "%d;DBHZ\n", Constants.MT_SIGU);
             try {
@@ -802,45 +848,72 @@ public class PerformDataAcq extends AppCompatActivity {
 					gnssDataOut.printf(Locale.US, "%d;%g;%g;%g\n", Constants.MT_LLA, mLocation.getLatitude(), mLocation.getLongitude(), mLocation.getAltitude());
 				}
 			} catch (NullPointerException e) {
-				errorMsg += e;
-				dataAcq_log.setText(errorMsg);
+				Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawDataWrite) + errorOn + e, Toast.LENGTH_LONG).show();
 			}
 			if (gnssDataOut.checkError()) {
-				errorMsg += "writing header data";
-				dataAcq_log.setText(errorMsg);
+				Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawDataWrite) + errorOn, Toast.LENGTH_LONG).show();
 			}
 		} catch (IllegalFormatException e) {
-			errorMsg += e;
-			dataAcq_log.setText(errorMsg);
+			Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawDataWrite) + e, Toast.LENGTH_LONG).show();
 		}
 	}
 	/**
-	 * storeNavMsg stores in the navigation raw data file a message with navigation data acquired from
-	 * a satellite.
-	 * @param msgType the message type to be gerated. It depends on the satellite / constellation
+	 * storeNavMsg stores in the navigation raw data file a message with navigation data acquired from a satellite.
+	 * At the begining, if GPST time data is available, a MT_EPOCH is output to allow further processing of navigation
+	 * data: f.e. to know the continuous week number it is needed to know the number of roll over occurred.
+	 * @param msgType the message type to be generated. It depends on the satellite / constellation
 	 * @param cnsID the constellation identifier (G, R, E, etc.)
-	 * @param sat the satellite number in the constellation
+	 * @param sat the satellite number (prn) in the constellation
 	 * @param navMsgSubId the  sub-message identifier, relevant to the navMsgType of the message (subframe, string, page, word, ...)
 	 * @param navMsgId an index to help with complete Navigation Message assembly (frame id, -1, frame nuber, subframe number, ...)
 	 * @param msgSize the message size (number of bytes in the message)
 	 * @param msg the navigation message data
 	 */
 	private void storeNavMsg(int msgType, int stat, char cnsID, int sat, int navMsgSubId, int navMsgId, int msgSize, byte[] msg) {
+		String cnsAndMsg;	//to identify constellation, message type and satellite number (C_MM@nn)
+		int msgTypeIndex = msgType - MT_SATNAV_OFFSET;
+		if ((msgTypeIndex < 0) || (msgTypeIndex > MAX_SATNAV_MSG)) return;
+		int satPos, iPos;
+		boolean addSat = true;
 		try {
 			if (!(epochRawData.isEmpty() || timeNavDataStored)) {
+				//one MT_EPOCH record is printed at the beginning of the file to have a GPST time reference for the data in the file
 				storeTimeEpoch(gnssNavOut);
 				timeNavDataStored = true;
 			}
+			//before storing the message, setup data to be presented in the user interface in the form NavMsg@Sats . For example:
+			//NavMsg@Sats: G_CA@11 R_CA@2 E_IN@3
+			//It means that they have been received GPS C/A nav messages from 11 satellites, GLONASS C/A nav messages from 2 satellites, and
+			//Galileo I/NAV messages from 3 satellites
+			//update the list of satellites for this message type if necessary
+			for (satPos = 0; addSat && satPos < totalSatsWithNavMsg[msgTypeIndex]; satPos++) {
+				if (satsWithNavMsg[msgTypeIndex][satPos] == sat) addSat = false;
+			}
+			if (addSat) {
+				//update the list adding this satellite, and also the counter (shall be
+				satsWithNavMsg[msgTypeIndex][satPos] = sat;
+				totalSatsWithNavMsg[msgTypeIndex]++;
+				totalSatsWithNavMsg[msgTypeIndex] %= MAX_SATNAV;	//should not be necessary ...
+				cnsAndMsg = navSrcId(msgType);
+				iPos = navMsgConstellations.indexOf(cnsAndMsg);
+				cnsAndMsg +=  String.format(Locale.US, "@%d ", totalSatsWithNavMsg[msgType - MT_SATNAV_OFFSET]);
+				if (iPos == -1) {
+					//this constallation-nav message type (C_MM) was not in the status message displayed
+					navMsgConstellations += cnsAndMsg;
+					navMsgFrom = getString(R.string.dataAcq_navStatus_READYfrom) + " ";
+				} else {
+					//replace the constallation-nav message type (C_MM@sats) by the updated one
+					navMsgConstellations = navMsgConstellations.substring(0, iPos) + cnsAndMsg + navMsgConstellations.substring(navMsgConstellations.indexOf(' ', iPos) + 1);
+				}
+			}
+			//some app versions, like Lite, could limit the number of satellites to process
+			if (limitNavMsgTo4 && satPos > 4) return;
+			//store the navigation message
 			gnssNavOut.printf(Locale.US, "%d;%d;%c%02d;%d;%d;%d", msgType, stat, cnsID, sat, navMsgSubId, navMsgId, msgSize);
 			for (int i = 0; i < msgSize; i++) gnssNavOut.printf(Locale.US, ";%02X", msg[i]);
 			gnssNavOut.printf(Locale.US, "\n");
-			if (navMsgConstellations.indexOf(cnsID) == -1) {
-				navMsgConstellations += " " + Character.toString(cnsID);
-				navMsgFrom =  " " + getString(R.string.dataAcq_navStatus_READYfrom);
-			}
 		} catch (IllegalFormatException e) {
-			String errorMsg = "storeNavMsg error:" + e;
-			dataAcq_log.setText(errorMsg);
+			Toast.makeText(getApplicationContext(), getString(R.string.dataAcq_rawDataWrite) + getString(R.string.dataAcq_rawObs) + e, Toast.LENGTH_LONG).show();
 		}
 	}
 	/**
@@ -895,5 +968,26 @@ public class PerformDataAcq extends AppCompatActivity {
 				epochRawData.get(0).epochClockDiscontinuityCount,
 				epochRawData.get(0).epochLeapSeconds,
 				epochRawData.size());
+	}
+	/**
+	 * navSrcId gives a printable string to identifiy the source of navigation messages.
+	 * It includes constellation identification and a short for the message type.
+	 *
+	 * @param msgType the type of navigatio message acquired from satellite (f.e. GPS L1 CA, GAL I/NAV, etc.)
+	 * @return the constellation plus message type identification
+	 */
+	private String navSrcId(int  msgType) {
+		switch(msgType) {
+			case Constants.MT_SATNAV_GPS_L1_CA:		return "G_CA";
+			case Constants.MT_SATNAV_GLONASS_L1_CA:	return "R_CA";
+			case Constants.MT_SATNAV_GALILEO_INAV:	return "E_IN";
+			case Constants.MT_SATNAV_GALILEO_FNAV:	return "E_FR";
+			case Constants.MT_SATNAV_BEIDOU_D1:		return "C_D1";
+			case Constants.MT_SATNAV_GPS_L5_C:		return "C_5C";
+			case Constants.MT_SATNAV_GPS_C2:		return "G_C2";
+			case Constants.MT_SATNAV_GPS_L2_C:		return "G_2C";
+			case Constants.MT_SATNAV_BEIDOU_D2:		return "C_D2";
+			default: 								return "UNKN";
+		}
 	}
 }

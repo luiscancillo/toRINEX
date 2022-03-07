@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/perf_dataAcq"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -28,7 +29,7 @@
         android:id="@+id/perf_dataAcq_satState"
         android:layout_width="fill_parent"
         android:layout_height="0px"
-        android:layout_weight="14"
+        android:layout_weight="17"
         android:scrollbars="vertical"
         android:text="@string/dataAcq_satStatTitle"
         android:fontFamily="monospace"
@@ -100,7 +101,6 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:text="@string/dataAcq_pointTitle" />
-
         <TextView
             android:id="@+id/perf_dataAcq_pointName"
             android:layout_width="0dip"
@@ -120,15 +120,17 @@
         android:id="@+id/perf_dataAcq_points"
         android:layout_width="fill_parent"
         android:layout_height="0px"
-        android:layout_weight="5"
+        android:layout_weight="6"
         android:scrollbars="vertical"
         android:textStyle="bold" />
-    <TextView
-        android:id="@+id/perf_dataAcq_log"
-        android:layout_width="fill_parent"
-        android:layout_height="0px"
-        android:layout_weight="4"
-        android:scrollbars="vertical"
-        android:text="@string/dataAcq_logMsgs"
-        />
+    <!--
+<TextView
+    android:id="@+id/perf_dataAcq_log"
+    android:layout_width="fill_parent"
+    android:layout_height="0px"
+    android:layout_weight="4"
+    android:scrollbars="vertical"
+    android:text="@string/dataAcq_logMsgs"
+    />
+            -->
 </LinearLayout>
