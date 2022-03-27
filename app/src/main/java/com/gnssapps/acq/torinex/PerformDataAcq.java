@@ -225,7 +225,7 @@ public class PerformDataAcq extends AppCompatActivity {
 					navStatus = status;
 				}
 			};
-/*TODO: to decide on the following code
+	/*TODO: to decide on the following code
 	private final GnssStatus.Callback gnssStatusListener =
 			new GnssStatus.Callback() {
 				@Override
@@ -235,7 +235,7 @@ public class PerformDataAcq extends AppCompatActivity {
 				@Override
 				public void onSatelliteStatusChanged(GnssStatus status) {}
 			};
-*/
+	*/
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		ActionBar appBar;
@@ -970,7 +970,7 @@ public class PerformDataAcq extends AppCompatActivity {
 				epochRawData.size());
 	}
 	/**
-	 * navSrcId gives a printable string to identifiy the source of navigation messages.
+	 * navSrcId gives a printable string to identify the source of navigation messages.
 	 * It includes constellation identification and a short for the message type.
 	 *
 	 * @param msgType the type of navigatio message acquired from satellite (f.e. GPS L1 CA, GAL I/NAV, etc.)
