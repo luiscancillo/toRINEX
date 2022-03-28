@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['short_20description_3a',['Short description:',['../index.html',1,'']]]
+  ['app_20description_3a',['App Description:',['../index.html',1,'']]]
 ];
